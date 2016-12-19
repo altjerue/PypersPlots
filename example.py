@@ -1,6 +1,5 @@
 import PypersPlots as pp
 
-
 # Generate random data file
 
 # Read random data file

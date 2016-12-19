@@ -28,6 +28,7 @@ def latexify():
         ],
     }
     mpl.rcParams.update(rc_custom_preamble)
+    return
 
 def dataExtract3col(filename, N, cols=(0,1,2)):
     '''contourExtract4(filename, N, cols=(0,1,2))
@@ -40,6 +41,9 @@ def dataExtract3col(filename, N, cols=(0,1,2)):
 
     N: int
     Size of the temporal arrays to generate the grid.
+
+    cols: tuple
+    Tuple of three int referring to the columns to be read.
     '''
     import numpy as np
     import scipy.interpolate
@@ -52,105 +56,200 @@ def dataExtract3col(filename, N, cols=(0,1,2)):
     )
     return v1i, v2i, ti
 
+def hdf5Extract3D(h5file, ds1, ds2, ds3):
+    ''' hdf5Extraxt(h5file)
 
-def hdf5Extract():
+    Extract data from an HDF5 data file.
 
+    h5file: string
+    File name.
+
+    ds1,ds2: strings
+    1D data set names
+
+    ds3:
+    2D  data set names
+    '''
+    import h5py as h5
+
+    h5f = h5.File(h5file, 'r')
+    v1 = emissTable[ds1][:]
+    v2 = emissTable[ds2][:]
+    v3 = emissTable[ds3][:,:]
+
+    return v1,v2,v3
+
+def initPlot():
+    '''Initializing single plot.
+    '''
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots()
+
+    return fig,ax
+
+def initmPlot(nrows=1,ncols=2,cbloc="right",cbmode="single",landscape=True):
+    '''Initializing multiple plots.
+
+
+    Return:
+    * fig: Figure instance.
+
+    * grid:
+
+    '''
+    import matplotlib.pyplot as plt
+    from matplotlib import figure
+    from mpl_toolkits.axes_grid1 import AxesGrid
+
+    if landscape:
+        w,h = figure.figaspect(2.0/3.0)
+    else:
+        w,h = figure.figaspect(1.5)
+    fig = plt.figure(figsize=(w, h))
+
+    grid = AxesGrid(fig, 111,
+                    nrows_ncols=(nrows, ncols),
+                    axes_pad=0.0,
+                    share_all=True,
+                    label_mode="L",
+                    cbar_location=cbloc,
+                    cbar_mode="single"
+    )
+
+    return fig,grid
+
+def plotxy(fig,ax,x,y,log=True):
+    import matplotlib.pyplot as plt
+    plt.figure(fig.number)
+    if log:
+        ax.loglog(x,y)
+    else:
+        ax.plot(x,y)
     return
 
-def theContours(fig, v1, v2, t, numl=7, log=True, fmt='%1.0f', levs=[0], labelpos=[0], rasterd=True):
+def theContours(fig, ax, v1, v2, t, numl=7, log=True, fmt='%1.0f', levs=[1], labelpos=[0], rasterd=True):
     ''' Setting the contour lines.
     '''
     import numpy as np
     import matplotlib.pyplot as plt
     plt.figure(fig.number)
-    if len(levs) == 1 and levs[0] == 0:
+    if len(levs) == 1 and levs[0] == 1:
+        CS = ax.contour(v1, v2, t, colors='k', lw=1.0, rasterized=rasterd)
+    else:
         if log:
             levs = np.logspace(np.log10(t.min()), np.log10(t.max()), num=numl)
         else:
             levs = np.linspace(t.min(), t.max(), num=numl)
+        CS = ax.contour(v1, v2, t, levels=levs, colors='k', lw=1.0, rasterized=rasterd)
 
-    CS = plt.contour(v1, v2, t, levels=levs, colors='k', linestyle = 'dotted', lw=2.0, rasterized=rasterd)
+
     if len(labelpos) == 1 and labelpos[0] == 0:
-        plt.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=False, rasterized=rasterd)
+        ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=False, rasterized=rasterd)
     else:
-        plt.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=labelpos, rasterized=rasterd)
+        ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=labelpos, rasterized=rasterd)
     return CS
 
-def theGradient(v1, v2, t, cbmin, cbmax, v1label=r"$x$", v2label="$y$", tlabel="$z$", LNorm=True, cmap='Accent', xlim=(0.0,3.0), ylim=(0.0,3.0), subs=[1.0], rasterd=True):
+def theGradient(fig, ax, v1, v2, t, cbmin, cbmax, v1label=r"$x$", v2label="$y$", tlabel="$z$", LNorm=True, cmap='Accent', xlim=(0.0,3.0), ylim=(0.0,3.0), subs=[1.0], rasterd=True):
     '''Setting the contour gradient plot.
     '''
-    mpl.use('pgf')
-
     import matplotlib.pyplot as plt
     import matplotlib.colors as col
+    import matplotlib.ticker as ticker
     import numpy as np
 
-    fig = plt.gcf()
-    ax = fig.add_subplot(111)
-
-    ticksize = 14
-    axfont = {'family' : 'sans-serif',
-              'weight' : 'normal'
-              }
+    plt.figure(fig.number)
 
     if LNorm:
-        import matplotlib.ticker as ticker
-        CM = plt.pcolormesh(v1, v2, t, cmap=cmap,
-                            norm=col.LogNorm(vmin=cbmin, vmax=cbmax),
-                            rasterized=rasterd)
-
+        CM = ax.pcolormesh(v1, v2, t,
+                           cmap=cmap,
+                           norm=col.LogNorm(vmin=cbmin, vmax=cbmax),
+                           rasterized=rasterd
+        )
         cbticks = ticker.LogLocator(base=10.0, subs=subs)
-        CB = plt.colorbar(CM, ax=ax, pad=0.0, extendrect=True, extend='both', extendfrac=0.01, ticks=cbticks, format=ticker.LogFormatter(base=10.0,labelOnlyBase=False))
+        CB = fig.colorbar(CM, ax=ax,
+                          pad=0.0,
+                          extendrect=True,
+                          extend='both',
+                          extendfrac=0.01,
+                          ticks=cbticks,
+                          format=ticker.LogFormatter(base=10.0, labelOnlyBase=False)
+        )
     else:
-        CM = plt.pcolormesh(v1, v2, t, cmap=cmap,
-                            norm=col.Normalize(vmin=cbmin, vmax=cbmax),
-                            rasterized=rasterd)
-        CB = plt.colorbar(CM, ax=ax, extendrect=True, extend='both')
+        CM = ax.pcolormesh(v1, v2, t,
+                           cmap=cmap,
+                           norm=col.Normalize(vmin=cbmin, vmax=cbmax),
+                           rasterized=rasterd
+        )
+        CB = fig.colorbar(CM, ax=ax,
+                          pad=0.0,
+                          extendrect=True,
+                          extend='both',
+                          extendfrac=0.01
+        )
 
-    CB.ax.tick_params(which='major', length=0, width=1.5, labelsize=ticksize)
-    CB.set_label(tlabel, labelpad=10, size=20, **axfont)
+    CB.ax.tick_params(which='major', length=0, width=1.5, labelsize=16)
+    CB.set_label(tlabel, size=20)
     CB.outline.set_linewidth(1.5)
-    CB.cmap.set_under(color='w')
-    CB.cmap.set_over()
-    CB.ax.set_rasterized(rasterd)
+    CB.cmap.set_under(color='k')
+    CB.cmap.set_over(color='w')
 
     ax.minorticks_on()
-    ax.tick_params(which='minor', length=3, width=1.5, )
-    ax.tick_params(which='major', length=6, width=1.5, labelsize=ticksize)
-    ax.ticklabel_format(axis='both', **axfont)
-    ax.set_xlabel(v1label, labelpad=15, size=20)
-    ax.set_ylabel(v2label, labelpad=10, size=20)
+    ax.tick_params(axis='both', which='minor', length=3, width=1.5)
+    ax.tick_params(axis='both', which='major', length=6, width=1.5, labelsize=16)
+    ax.set_xlabel(v1label, size=20)
+    ax.set_ylabel(v2label, size=20)
+
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+
+    return CM,CB
+
+def printer(fig, ax, fname, savedir, pgfsavedir, onscreen=False, rasterd=True, printPNG=False, printPDF=True):
+    import matplotlib.pyplot as plt
+    plt.figure(fig.number)
 
     for axis in ['top','bottom','left','right']:
         ax.spines[axis].set_linewidth(1.5)
         ax.spines[axis].set_color('black')
-
-    plt.xlim(xlim)
-    plt.ylim(ylim)
-
-    ax.set_rasterized(rasterd)
     plt.subplots_adjust(left=0.10, bottom=0.13, right=0.95, top=0.95)
 
-    return fig
-
-def printer(fig, name, onscreen=False, rasterd=True):
-    import matplotlib.pyplot as plt
-    plt.figure(fig.number)
-
+    fullname = savedir + fname
     if onscreen:
-        #plt.title(name)
-        plt.draw()
+        plt.title(fname)
+        plt.show()
+        plt.clf()
     else:
-        plt.savefig(name + '.pdf', format='pdf', dpi=300, rasterized=rasterd)
-        plt.savefig(name + '.png', format='png', dpi=300, rasterized=rasterd)
-        plt.savefig(name + '.pgf')
-    plt.clf()
+        if  printPNG:
+            fig.savefig(fullname + '.png', format='png', dpi=300, rasterized=rasterd)
+        if printPDF:
+            fig.savefig(fullname + '.pdf', format='pdf', dpi=300, rasterized=rasterd)
+        fig.savefig(fullname + '.pgf')
+        im = sp.Popen(['imgtops', '-3', '-e', fullname + '-img0.png'], stdout=sp.PIPE)
+        imEPS, imerr = im.communicate()
+        imEPSf = open(fullname + '-img0.eps', 'w')
+        imEPSf.write(imEPS)
+        imEPSf.close()
+        im = sp.Popen(['imgtops', '-3', '-e', fullname + '-img1.png'], stdout=sp.PIPE)
+        imEPS, imerr = im.communicate()
+        imEPSf = open(fullname + '-img1.eps', 'w')
+        imEPSf.write(imEPS)
+        imEPSf.close()
+
+        # MODIF PGF FILE (PNG -> EPS & LOC -> FULL LOC)
+        replacements = {'png':'eps', fname:pgfdir + fname}
+        lines = []
+        with open(fullname + '.pgf') as infile:
+            for line in infile:
+                for src, target in replacements.iteritems():
+                    line = line.replace(src, target)
+                lines.append(line)
+        with open(fullname + '.pgf', 'w') as outfile:
+            for line in lines:
+                outfile.write(line)
+
+        if delPNGs:
+            for pngIM in ['-img0', '-img1']:
+                sp.call(['rm', '-f', fullname + pngIM + '.png'])
+    print('  Printing: done')
+
     return
-
-#    plt.show()
-#    CS = theContours(v1, v2, t, numl=nl)
-
-###### EXPONENT SEARCHER   ################
-#        expmax = np.ceil(np.log10(np.abs(cbmax))).astype(int)
-#        expmin = np.floor(np.log10(np.abs(cbmax))).astype(int)
-#        cbticks = np.outer(np.power(10.,range(-1,3)),np.arange(1.,10.)).flatten()

@@ -118,7 +118,7 @@ def initmPlot(nrows=1,ncols=2,cbloc="right",cbmode="single",landscape=True):
 
     return fig,grid
 
-def plotxy(fig,ax,x,y,log=True):
+def plotxy(fig,ax,x,y,log=False):
     import matplotlib.pyplot as plt
     plt.figure(fig.number)
     if log:
@@ -204,14 +204,14 @@ def theGradient(fig, ax, v1, v2, t, cbmin, cbmax, v1label=r"$x$", v2label="$y$",
 
     return CM,CB
 
-def printer(fig, ax, fname, savedir, pgfsavedir, onscreen=False, rasterd=True, printPNG=False, printPDF=True):
+def printer(fig, ax, fname, savedir="./", pgfsavedir="./", onscreen=False, rasterd=True, printPNG=False, printPDF=True):
     import matplotlib.pyplot as plt
     plt.figure(fig.number)
 
     for axis in ['top','bottom','left','right']:
         ax.spines[axis].set_linewidth(1.5)
         ax.spines[axis].set_color('black')
-    plt.subplots_adjust(left=0.10, bottom=0.13, right=0.95, top=0.95)
+    fig.subplots_adjust(left=0.10, bottom=0.13, right=0.95, top=0.95)
 
     fullname = savedir + fname
     if onscreen:

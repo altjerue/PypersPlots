@@ -1,4 +1,4 @@
-This is a library intended to produce publishable and not so heavy contour and gradient plots.
+This is a library intended to produce ready to publish (and not so heavy) plots.
 
 # Prerequisites #
 
@@ -118,12 +118,20 @@ pp.printer(fig,'fields and streams',onscreen=True)
 
 ```
 
-![](README_figs/fields_and_streams.png)
+![Output](README_figs/fields_and_streams.png)
+
+To produce this plot it is straigh
 
 # Recomendations and observations #
 
-For a good interactive plotting I suggest using IPython. Once inside call the magic command `%%matplotlib osx`, if you are using macOS:
+For a good interactive plotting I suggest using IPython. Once inside call
+the magic command `%%matplotlib osx`, if you are using macOS:
 
 ``` jupyter-notebook
 %%matplotlib osx
 ```
+
+Something that must be pointed out is that the PNG image will not have the
+correct characters. However the PDF and PGF will.
+
+This module is under development. Any issue, comment and upgrades are most welcome.

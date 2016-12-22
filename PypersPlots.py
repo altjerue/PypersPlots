@@ -109,7 +109,7 @@ def decor(ax,xlim=None,ylim=None,xlabel=r"$x$",ylabel=r"$y$",lw=1.0,tlabelsize=1
         ax.spines[axis].set_linewidth(lw)
         ax.spines[axis].set_color('black')
 
-def printer(fig,fname, savedir="./", pgfdir="./", onscreen=False, rasterd=True, printPNG=False, printPDF=True):
+def printer(fig,fname, savedir="./", pgfdir=None, onscreen=False, rasterd=True, printPNG=False, printPDF=True, delPNG=True):
     import matplotlib.pyplot as plt
     import subprocess as sp
     import os
@@ -124,26 +124,30 @@ def printer(fig,fname, savedir="./", pgfdir="./", onscreen=False, rasterd=True, 
             plt.savefig(fullname + '.pdf', format='pdf', dpi=300, rasterized=rasterd)
         plt.savefig(fullname + '.pgf', dpi=300, rasterized=True)
         counter = 0
-        for file in os.listdir(savedir):
+        for lsitem in os.listdir(savedir):
             img_name = "-img%d" % (counter)
-            if file.endswith(img_name + ".png"):
+            #print(img_name)
+            if lsitem.endswith(img_name + ".png"):
                 im = sp.Popen(['imgtops', '-3', '-e', fullname + img_name + ".png"], stdout=sp.PIPE)
                 imEPS, imerr = im.communicate()
                 imEPSf = open(fullname + img_name + ".eps", 'w')
                 imEPSf.write(imEPS)
                 imEPSf.close()
-                if delPNGs:
+                if delPNG:
                     sp.call(['rm', '-f', fullname + img_name + '.png'])
-            counter += 1
+                counter += 1
 
         # MODIF PGF FILE (PNG -> EPS & LOC -> FULL LOC)
+        if pgfdir == None:
+            pgfdir = savedir
+
         replacements = {'png':'eps', fname:pgfdir + fname}
         lines = []
         with open(fullname + '.pgf') as infile:
             for line in infile:
                 for src, target in replacements.iteritems():
                     line = line.replace(src, target)
-                    lines.append(line)
+                lines.append(line)
         with open(fullname + '.pgf', 'w') as outfile:
             for line in lines:
                 outfile.write(line)
@@ -173,7 +177,7 @@ def theContours(ax, v1, v2, t, numl=None, clabels=False, logsep=False, fmt='%1.0
             ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=labelpos)
     return CS
 
-def theGradient(fig, ax, v1, v2, t, cbmin, cbmax, v1label=r"$x$", v2label="$y$", tlabel="$z$", LNorm=True, cmap='Accent', xlim=(0.0,3.0), ylim=(0.0,3.0), rasterd=True):
+def theGradient(fig, ax, v1, v2, t, cbmin, cbmax, v1label=r"$x$", v2label="$y$", tlabel="$z$", LNorm=True, cmap='gist_stern', xlim=(0.0,3.0), ylim=(0.0,3.0), rasterd=True):
     """Setting the contour gradient plot.
     """
     if LNorm:
@@ -190,7 +194,7 @@ def theGradient(fig, ax, v1, v2, t, cbmin, cbmax, v1label=r"$x$", v2label="$y$",
         )
     return CM
 
-def setColorBar(TT,fig,ax,log=False,blw=1.0,cblabel=r"$z$", subs=[1.0],):
+def setColorBar(TT,fig,ax,log=False,blw=1.0,cblabel=r"$z$",cmap=None,subs=[1.0]):
     import matplotlib.colors as col
     import matplotlib.ticker as ticker
 
@@ -211,9 +215,12 @@ def setColorBar(TT,fig,ax,log=False,blw=1.0,cblabel=r"$z$", subs=[1.0],):
                           extend='both',
                           extendfrac=0.01
         )
+    if cmap == None:
+        cmap = TT.get_cmap()
     CB.ax.tick_params(which='major', length=0)
     CB.set_label(cblabel)
     CB.outline.set_linewidth(blw)
+    CB.set_cmap(cmap)
     CB.cmap.set_under(color='k')
     CB.cmap.set_over(color='w')
     return CB
@@ -247,6 +254,26 @@ def dataExtract3col(filename, N, cols=(0,1,2)):
                                     method='cubic', rescale=True
     )
     return v1i, v2i, ti
+
+def hdf5Extract2D(h5file, ds1, ds2):
+    """ hdf5Extraxt(h5file)
+
+    Extract data from an HDF5 data file.
+
+    h5file: string
+    File name.
+
+    ds1,ds2: strings
+    1D data set names
+
+    """
+    import h5py as h5
+
+    h5f = h5.File(h5file, 'r')
+    v1 = emissTable[ds1][:]
+    v2 = emissTable[ds2][:]
+
+    return v1,v2
 
 def hdf5Extract3D(h5file, ds1, ds2, ds3):
     """ hdf5Extraxt(h5file)

@@ -58,6 +58,8 @@ import numpy as np
 import colorcet as cc
 import PypersPlots as pp
 
+pp.latexify()
+
 fig,ax = pp.initPlot(ncols=2)
 
 ### Here we plot the electric potential and field ###
@@ -70,8 +72,7 @@ phi = np.ma.masked_where((r1<=0.03)|(r2<=0.03), phi)
 lines = np.linspace(np.abs(phi).min()*40,np.abs(phi).max()/2, 7)
 lines = np.append(lines,-lines)
 lines.sort()
-fig,ax = pp.initPlot()
-pp.theContours(ax,x,y,phi,levs=lines)
+pp.theContours(ax[0],x,y,phi,levs=lines)
 
 x, y = np.meshgrid(np.linspace(-0.2,0.4,20),np.linspace(-0.3,0.3,20))
 r1 = np.sqrt((x**2) + (y**2))
@@ -82,11 +83,13 @@ EE = np.sqrt(Ex**2 + Ey**2)
 Ex = np.ma.masked_where((r1<=0.03)|(r2<=0.03), Ex)
 Ey = np.ma.masked_where((r1<=0.03)|(r2<=0.03), Ey)
 EE = np.ma.masked_where((r1<=0.03)|(r2<=0.03), EE)
+EQ = ax[0].quiver(x,y,Ex/EE,Ey/EE,units='xy',pivot='mid')
 
-EQ = ax.quiver(x,y,Ex/EE,Ey/EE,units='xy',pivot='mid')
-
+pp.decor(ax[0],xlabel=r'$\mathcal{X}$', ylabel=r'$\mathcal{Y}$')
 
 ### Stream lines of a flow of an incompressible fluid past a cylinder ###
+Uinf = 1.
+a = 1.
 x,y = np.meshgrid(*(np.linspace(-3.,3.,500),)*2)
 psi = Uinf * x * (1.0 + a / (x**2 + y**2)**2)
 Ux = Uinf * ( 1.0 + (a * (y**2 - x**2) / (x**2 + y**2)**2) )
@@ -99,16 +102,24 @@ UU = np.sqrt(Ux**2 + Uy**2)
 lines = np.linspace(0.04, 1.75, 7)
 lines = np.append(lines,-lines)
 lines.sort()
-lcolors = ['r',]*7 + ['g',]*7
-fig,ax = pp.initPlot()
-pp.theContours(ax,x,y,psi,levs=lines,colors=lcolors)
-stream = ax.streamplot(x,y,Ux,Uy,color=UU,linewidth=2,cmap=cc.cm['kbc'])
-streamCB = pp.setColorBar(stream.lines,fig,ax,cblabel='speed')
-ax = pp.decor(ax,ylabel=r"$\mathcal{Y}$",xlabel=r"$\mathcal{X}$")
+pp.theContours(ax[1],x,y,psi,levs=lines,colors='r')
+stream = ax[1].streamplot(x,y,Ux,Uy,color=UU,linewidth=2,cmap=cc.cm['kbc'])
+streamCB = pp.setColorBar(stream.lines,fig,ax[1],cblabel='speed')
+pp.decor(ax[1],ylabel=r"$\mathcal{Y}$",xlabel=r"$\mathcal{X}$")
 
+lines = np.linspace(np.abs(phi).min()*40,np.abs(phi).max()/2, 7)
+lines = np.append(lines,-lines)
+lines.sort()
+pp.theContours(ax[0],x,y,phi,levs=lines)
 
 ```
 
+# Recomendations #
 
+For a good interactive plotting I suggest using IPython. Once inside call the magic command `%%matplotlib osx`, if you are using macOS:
+
+``` jupyter-notebook
+%%matplotlib osx
+```
 
 ## Multiple plots ##

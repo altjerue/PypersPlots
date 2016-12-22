@@ -33,6 +33,7 @@ def latexify(fscale=1.0):
         "xtick.labelsize": 10,
         "ytick.labelsize": 10,
         "figure.figsize": figsize(fscale),     # default fig size of 0.9 textwidth
+        "figure.autolayout": True,
         "savefig.transparent": True,
         "savefig.dpi": 300,
         "pgf.texsystem": "lualatex",        # change this if using xelatex or lualatex
@@ -50,13 +51,12 @@ def latexify(fscale=1.0):
     }
     mpl.rcParams.update(rc_mnras_preamble)
 
-def initPlot(nrows=1,ncols=1,cbloc="right",cbmode="single",landscape=True):
+def initPlot(nrows=1,ncols=1,landscape=True):
     """Initializing plot.
 
     Return:
 
-    * fig: Figure instance.
-    * grid:
+    * fig: Figure class.
 
     """
     import matplotlib.pyplot as plt
@@ -66,23 +66,30 @@ def initPlot(nrows=1,ncols=1,cbloc="right",cbmode="single",landscape=True):
         w,h = figure.figaspect(2.0/3.0)
     else:
         w,h = figure.figaspect(1.5)
+
+    fig, ax = plt.subplots(nrows=nrows, ncols=ncols)
+    fig.set_size_inches(w, h)
+
+    return fig,ax
+
+def initGrid(nrows=1,ncols=1,cbloc="right",cbmode="each",landscape=True):
+    from mpl_toolkits.axes_grid1 import AxesGrid
+
+    if landscape:
+        w,h = figure.figaspect(2.0/3.0)
+    else:
+        w,h = figure.figaspect(1.5)
     fig = plt.figure(figsize=(w, h))
 
-    if nrows > 1 or ncols > 1:
-
-        from mpl_toolkits.axes_grid1 import AxesGrid
-
-        ax = AxesGrid(fig, 111,
-                      nrows_ncols=(nrows, ncols),
-                      axes_pad=0.0,
-                      share_all=True,
-                      label_mode="L",
-                      cbar_location=cbloc,
-                      cbar_mode="single"
-        )
-    else:
-        ax = fig.add_subplot(111)
-    return fig,ax
+    grid = AxesGrid(fig, 111,
+                    nrows_ncols=(nrows, ncols),
+                    axes_pad=0.0,
+                    share_all=True,
+                    label_mode="L",
+                    cbar_location=cbloc,
+                    cbar_mode=cbmode
+    )
+    return grid
 
 def decor(ax,xlim=None,ylim=None,xlabel=r"$x$",ylabel=r"$y$",lw=1.0,tlabelsize=10,minticks_on=True):
     if minticks_on:
@@ -101,14 +108,13 @@ def decor(ax,xlim=None,ylim=None,xlabel=r"$x$",ylabel=r"$y$",lw=1.0,tlabelsize=1
     for axis in ['top','bottom','left','right']:
         ax.spines[axis].set_linewidth(lw)
         ax.spines[axis].set_color('black')
-    return ax
 
-def printer(fig,ax,fname, savedir="./", pgfdir="./", onscreen=False, rasterd=True, printPNG=False, printPDF=True):
+def printer(fig,fname, savedir="./", pgfdir="./", onscreen=False, rasterd=True, printPNG=False, printPDF=True):
     import matplotlib.pyplot as plt
     import subprocess as sp
     import os
     if onscreen:
-        ax.set_title(fname)
+        fig.suptitle(fname)
         plt.show()
     else:
         fullname = savedir + fname

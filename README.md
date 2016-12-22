@@ -114,10 +114,11 @@ lines = np.append(lines,-lines)
 lines.sort()
 pp.theContours(ax[0],x,y,psi,levs=lines)
 
-pp.printer(fig,'fields_and_streams')#,onscreen=True)
+pp.printer(fig,'fields and streams',onscreen=True)
+
 ```
 
-![](README_figs/fields_and_)
+![](README_figs/fields_and_streams.png)
 
 # Recomendations and observations #
 

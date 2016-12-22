@@ -7,7 +7,8 @@ This is a library intended to produce ready to publish (and not so heavy) plots.
   * numpy
   * scipy
   * h5py (optional)
-  * colorcet (optional
+  * colorcet (optional)
+  * [imgtops](http://imgtops.sourceforge.net/)
 
 # Examples #
 
@@ -20,9 +21,11 @@ pp.latexify()
 x = np.linspace(0.0, 2.0*np.pi, 50)
 fig,ax = pp.initPlot()
 ax.plot(x,np.sin(x))
-ax = pp.decor(ax,xlim=(0.0,2.0*np.pi),ylim=(-1.0,1.0),ylabel=r"$\mathcal{L}$",xlabel=r"$\mathcal{X}$")
-pp.printer(fig,ax,'some example',onscreen=True)
+ax.plot(x,np.cos(x))
+pp.decor(ax,xlim=(0.0,2.0*np.pi),ylim=(-1.0,1.0),ylabel=r"$\mathcal{L}$",xlabel=r"$\mathcal{X}$")
+pp.printer(fig,'sin')
 ```
+![](README_figs/sin.png)
 
 ## Contours plot ##
 
@@ -34,6 +37,7 @@ z = np.sin(20*x**2)*np.cos(30*y)
 fig,ax = initPlot()
 pp.theContours(ax,x,y,z,colors=['r','b'])
 ```
+![](README_figs/contours.png)
 
 ## Gradient plot ##
 
@@ -47,6 +51,7 @@ To produce these examples go to the wiki. I will be placing more elaborated stuf
 
 # Recomendations and observations #
 
+## Interacting with Python ##
 For a good interactive plotting I suggest using IPython. Once inside call
 the magic command `%%matplotlib osx`, if you are using macOS:
 
@@ -54,7 +59,10 @@ the magic command `%%matplotlib osx`, if you are using macOS:
 %%matplotlib osx
 ```
 
+## About the output ##
 Something that must be pointed out is that the PNG image will not have the
 correct characters. However the PDF and PGF will.
+
+##  ##
 
 This module is under development. Any issue, comment and upgrades are most welcome.

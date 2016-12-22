@@ -24,9 +24,9 @@ def latexify(fscale=1.0):
     mpl.use('pgf')
     from matplotlib.backends.backend_pgf import FigureCanvasPgf
     mpl.backend_bases.register_backend('pdf', FigureCanvasPgf)
+    mpl.backend_bases.register_backend('png', FigureCanvasPgf)
     rc_mnras_preamble = {
-        #"backend" : "ps",
-        #"font.size": 10,
+        #"backend": "pgf"
         "text.usetex": False,        # use LaTeX to write all text
         "axes.labelsize": 16,        # fontsize for x and y labels (was 10)
         "legend.fontsize": 10,       # was 10
@@ -66,13 +66,14 @@ def initPlot(nrows=1,ncols=1,landscape=True):
         w,h = figure.figaspect(2.0/3.0)
     else:
         w,h = figure.figaspect(1.5)
-
+    plt.clf()
     fig, ax = plt.subplots(nrows=nrows, ncols=ncols)
     fig.set_size_inches(w, h)
 
     return fig,ax
 
 def initGrid(nrows=1,ncols=1,cbloc="right",cbmode="each",landscape=True):
+    import matplotlib.pyplot as plt
     from mpl_toolkits.axes_grid1 import AxesGrid
 
     if landscape:
@@ -91,7 +92,7 @@ def initGrid(nrows=1,ncols=1,cbloc="right",cbmode="each",landscape=True):
     )
     return grid
 
-def decor(ax,xlim=None,ylim=None,xlabel=r"$x$",ylabel=r"$y$",lw=1.0,tlabelsize=10,minticks_on=True):
+def decor(ax,xlim=None,ylim=None,xlabel=r"$x$",ylabel=r"$y$",lw=1.0,tlabelsize=10,minticks_on=True,gridon=False):
     if minticks_on:
         ax.minorticks_on()
         ax.tick_params(axis='both', which='minor', length=3, width=lw)
@@ -105,28 +106,32 @@ def decor(ax,xlim=None,ylim=None,xlabel=r"$x$",ylabel=r"$y$",lw=1.0,tlabelsize=1
         ylim = ax.get_ylim()
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
+
     for axis in ['top','bottom','left','right']:
         ax.spines[axis].set_linewidth(lw)
         ax.spines[axis].set_color('black')
 
-def printer(fig,fname, savedir="./", pgfdir=None, onscreen=False, rasterd=True, printPNG=False, printPDF=True, delPNG=True):
+    if gridon:
+        ax.grid()
+
+def printer(fig,fname, savedir="./", onscreen=False, rasterd=True, printPNG=False, printPDF=True, delPNG=True):
     import matplotlib.pyplot as plt
-    import subprocess as sp
-    import os
     if onscreen:
         fig.suptitle(fname)
         plt.show()
     else:
+        import subprocess as sp
+        import os
         fullname = savedir + fname
         if  printPNG:
-            plt.savefig(fullname + '.png', format='png', dpi=300, rasterized=rasterd)
+            fig.savefig(fullname + '.png', format='png', rasterized=rasterd)
         if printPDF:
-            plt.savefig(fullname + '.pdf', format='pdf', dpi=300, rasterized=rasterd)
-        plt.savefig(fullname + '.pgf', dpi=300, rasterized=True)
+            fig.savefig(fullname + '.pdf', format='pdf', rasterized=rasterd)
+
+        fig.savefig(fullname + '.pgf', format='pgf', rasterized=True)
         counter = 0
         for lsitem in os.listdir(savedir):
             img_name = "-img%d" % (counter)
-            #print(img_name)
             if lsitem.endswith(img_name + ".png"):
                 im = sp.Popen(['imgtops', '-3', '-e', fullname + img_name + ".png"], stdout=sp.PIPE)
                 imEPS, imerr = im.communicate()
@@ -138,10 +143,7 @@ def printer(fig,fname, savedir="./", pgfdir=None, onscreen=False, rasterd=True, 
                 counter += 1
 
         # MODIF PGF FILE (PNG -> EPS & LOC -> FULL LOC)
-        if pgfdir == None:
-            pgfdir = savedir
-
-        replacements = {'png':'eps', fname:pgfdir + fname}
+        replacements = {'png':'eps', fname:savedir + fname}
         lines = []
         with open(fullname + '.pgf') as infile:
             for line in infile:
@@ -177,9 +179,12 @@ def theContours(ax, v1, v2, t, numl=None, clabels=False, logsep=False, fmt='%1.0
             ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=labelpos)
     return CS
 
-def theGradient(fig, ax, v1, v2, t, cbmin, cbmax, v1label=r"$x$", v2label="$y$", tlabel="$z$", LNorm=True, cmap='gist_stern', xlim=(0.0,3.0), ylim=(0.0,3.0), rasterd=True):
+def theGradient(fig, ax, v1, v2, t, cbmin, cbmax, v1label=r"$x$", v2label="$y$", tlabel="$z$", LNorm=True, cmap=None, xlim=(0.0,3.0), ylim=(0.0,3.0), rasterd=True):
     """Setting the contour gradient plot.
     """
+    if cmap == None:
+        import colorcet as cc
+        cmap = cc.cm['bgy']
     if LNorm:
         CM = ax.pcolormesh(v1, v2, t,
                            cmap=cmap,
@@ -194,7 +199,7 @@ def theGradient(fig, ax, v1, v2, t, cbmin, cbmax, v1label=r"$x$", v2label="$y$",
         )
     return CM
 
-def setColorBar(TT,fig,ax,log=False,blw=1.0,cblabel=r"$z$",cmap=None,subs=[1.0]):
+def setColorBar(TT,fig,ax,log=False,blw=1.0,cblabel=r"$z$",subs=[1.0]):
     import matplotlib.colors as col
     import matplotlib.ticker as ticker
 
@@ -215,12 +220,9 @@ def setColorBar(TT,fig,ax,log=False,blw=1.0,cblabel=r"$z$",cmap=None,subs=[1.0])
                           extend='both',
                           extendfrac=0.01
         )
-    if cmap == None:
-        cmap = TT.get_cmap()
     CB.ax.tick_params(which='major', length=0)
     CB.set_label(cblabel)
     CB.outline.set_linewidth(blw)
-    CB.set_cmap(cmap)
     CB.cmap.set_under(color='k')
     CB.cmap.set_over(color='w')
     return CB

@@ -26,7 +26,7 @@ def latexify(fscale=1.0):
     mpl.backend_bases.register_backend('pdf', FigureCanvasPgf)
     rc_mnras_preamble = {
         #"backend" : "ps",
-        "font.size": 10,
+        #"font.size": 10,
         "text.usetex": False,        # use LaTeX to write all text
         "axes.labelsize": 16,        # fontsize for x and y labels (was 10)
         "legend.fontsize": 10,       # was 10
@@ -84,7 +84,7 @@ def initPlot(nrows=1,ncols=1,cbloc="right",cbmode="single",landscape=True):
         ax = fig.add_subplot(111)
     return fig,ax
 
-def decor(ax,xlim=(1.0, 3.0),ylim=(1.0,3.0),xlabel=r"$x$",ylabel=r"$y$",lw=1.0,tlabelsize=10,minticks_on=True):
+def decor(ax,xlim=None,ylim=None,xlabel=r"$x$",ylabel=r"$y$",lw=1.0,tlabelsize=10,minticks_on=True):
     if minticks_on:
         ax.minorticks_on()
         ax.tick_params(axis='both', which='minor', length=3, width=lw)
@@ -92,6 +92,10 @@ def decor(ax,xlim=(1.0, 3.0),ylim=(1.0,3.0),xlabel=r"$x$",ylabel=r"$y$",lw=1.0,t
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
+    if xlim == None:
+        xlim = ax.get_xlim()
+    if ylim == None:
+        ylim = ax.get_ylim()
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
     for axis in ['top','bottom','left','right']:
@@ -140,38 +144,53 @@ def printer(fig,ax,fname, savedir="./", pgfdir="./", onscreen=False, rasterd=Tru
 
     print('  Printing: done')
 
-def theContours(fig, ax, v1, v2, t, numl=7, log=True, fmt='%1.0f', levs=[1], labelpos=[0], rasterd=True):
+def theContours(ax, v1, v2, t, numl=None, clabels=False, logsep=False, fmt='%1.0f', levs=[1], labelpos=[0], rasterd=True, colors='k'):
     """ Setting the contour lines.
     """
-    if len(levs) == 1 and levs[0] == 1:
-        CS = ax.contour(v1, v2, t, colors='k', lw=1.0, rasterized=rasterd)
+    import numpy as np
+    if numl==None:
+        if len(levs) == 1 and levs[0] == 1:
+            CS = ax.contour(v1, v2, t, colors=colors, lw=1.0, rasterized=rasterd)
+        else:
+            CS = ax.contour(v1, v2, t, levels=levs, colors=colors, lw=1.0, rasterized=rasterd)
     else:
-        if log:
+        if logsep:
             levs = np.logspace(np.log10(t.min()), np.log10(t.max()), num=numl)
         else:
-            levs = np.linspace(t.min(), t.max(), num=numl)
-        CS = ax.contour(v1, v2, t, levels=levs, colors='k', lw=1.0, rasterized=rasterd)
+            levs = np.linspace(t.min(), t.max(), numl)
+        CS = ax.contour(v1, v2, t, levels=levs, colors=colors, lw=1.0, rasterized=rasterd)
 
+    if clabels:
+        if len(labelpos) == 1 and labelpos[0] == 0:
+            ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=False)
+        else:
+            ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=labelpos)
+    return CS
 
-    if len(labelpos) == 1 and labelpos[0] == 0:
-        ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=False, rasterized=rasterd)
-    else:
-        ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=labelpos, rasterized=rasterd)
-
-def theGradient(fig, ax, v1, v2, t, cbmin, cbmax, v1label=r"$x$", v2label="$y$", tlabel="$z$", LNorm=True, cmap='Accent', xlim=(0.0,3.0), ylim=(0.0,3.0), subs=[1.0], rasterd=True):
+def theGradient(fig, ax, v1, v2, t, cbmin, cbmax, v1label=r"$x$", v2label="$y$", tlabel="$z$", LNorm=True, cmap='Accent', xlim=(0.0,3.0), ylim=(0.0,3.0), rasterd=True):
     """Setting the contour gradient plot.
     """
-    import matplotlib.colors as col
-    import matplotlib.ticker as ticker
-
     if LNorm:
         CM = ax.pcolormesh(v1, v2, t,
                            cmap=cmap,
                            norm=col.LogNorm(vmin=cbmin, vmax=cbmax),
                            rasterized=rasterd
         )
+    else:
+        CM = ax.pcolormesh(v1, v2, t,
+                           cmap=cmap,
+                           norm=col.Normalize(vmin=cbmin, vmax=cbmax),
+                           rasterized=rasterd
+        )
+    return CM
+
+def setColorBar(TT,fig,ax,log=False,blw=1.0,cblabel=r"$z$", subs=[1.0],):
+    import matplotlib.colors as col
+    import matplotlib.ticker as ticker
+
+    if log:
         cbticks = ticker.LogLocator(base=10.0, subs=subs)
-        CB = fig.colorbar(CM, ax=ax,
+        CB = fig.colorbar(TT, ax=ax,
                           pad=0.0,
                           extendrect=True,
                           extend='both',
@@ -180,23 +199,18 @@ def theGradient(fig, ax, v1, v2, t, cbmin, cbmax, v1label=r"$x$", v2label="$y$",
                           format=ticker.LogFormatter(base=10.0, labelOnlyBase=False)
         )
     else:
-        CM = ax.pcolormesh(v1, v2, t,
-                           cmap=cmap,
-                           norm=col.Normalize(vmin=cbmin, vmax=cbmax),
-                           rasterized=rasterd
-        )
-        CB = fig.colorbar(CM, ax=ax,
+        CB = fig.colorbar(TT, ax=ax,
                           pad=0.0,
                           extendrect=True,
                           extend='both',
                           extendfrac=0.01
         )
-
-    CB.ax.tick_params(which='major', length=0, width=1.5, labelsize=16)
-    CB.set_label(tlabel, size=20)
-    CB.outline.set_linewidth(1.5)
+    CB.ax.tick_params(which='major', length=0)
+    CB.set_label(cblabel)
+    CB.outline.set_linewidth(blw)
     CB.cmap.set_under(color='k')
     CB.cmap.set_over(color='w')
+    return CB
 
 ############################################################################
 #           EXTRACTING DATA

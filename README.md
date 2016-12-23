@@ -66,6 +66,7 @@ pp.decor(grid[0],xlabel=r"$\mathcal{X}$",ylabel=r"$\mathcal{Y}$")
 pp.decor(grid[1],xlabel=r"$\mathcal{X}$")
 pp.printer(fig,'gradient')
 ```
+![](README_figs/gradient.png)
 
 ## More elaborate example examples ##
 

@@ -173,7 +173,7 @@ def printer(fig,fname, savedir="./", onscreen=False, rasterd=True, printPNG=Fals
     print('  Printing: done')
 
 ## The contour plots
-def theContours(ax, v1, v2, t, numl=None, clabels=False, logsep=False, fmt='%1.0f', levs=[1], labelpos=[0], rasterd=True, colors='k'):
+def theContours(ax, v1, v2, t, clim=None, numl=None, clabels=False, logsep=False, fmt='%1.0f', levs=[1], labelpos=[0], rasterd=True, colors='k'):
     """ Setting the contour lines.
     """
     import numpy as np
@@ -183,10 +183,12 @@ def theContours(ax, v1, v2, t, numl=None, clabels=False, logsep=False, fmt='%1.0
         else:
             CS = ax.contour(v1, v2, t, levels=levs, colors=colors, lw=1.0, rasterized=rasterd)
     else:
+        if clim is None:
+            clim = (t.min(), t.max())
         if logsep:
-            levs = np.logspace(np.log10(t.min()), np.log10(t.max()), num=numl)
+            levs = np.logspace(np.log10(clim[0]), np.log10(clim[1]), num=numl)
         else:
-            levs = np.linspace(t.min(), t.max(), numl)
+            levs = np.linspace(clim[0], clim[1], numl)
         CS = ax.contour(v1, v2, t, levels=levs, colors=colors, lw=1.0, rasterized=rasterd)
 
     if clabels:
@@ -196,7 +198,7 @@ def theContours(ax, v1, v2, t, numl=None, clabels=False, logsep=False, fmt='%1.0
             ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=labelpos)
     return CS
 
-def theGradient(ax, v1, v2, t, cmlim, v1label=r"$x$", v2label="$y$", tlabel="$z$", LNorm=True, cmap=None, xlim=(0.0,3.0), ylim=(0.0,3.0), rasterd=True):
+def theGradient(ax, v1, v2, t, cmlim, v1label=r"$x$", v2label="$y$", tlabel="$z$", LNorm=False, cmap=None, xlim=(0.0,3.0), ylim=(0.0,3.0), rasterd=True):
     """Setting the contour gradient plot.
     """
     import matplotlib.colors as col
@@ -222,7 +224,7 @@ def theGradient(ax, v1, v2, t, cmlim, v1label=r"$x$", v2label="$y$", tlabel="$z$
         )
     return CM
 
-def setColorBar(TT,fig,cbax,log=False,blw=1.0,cblabel=r"$z$",subs=[1.0],**kw):
+def setColorBar(TT,fig,cbax,log=False,blw=1.0,cblabel=r"$z$",subs=[1.0],pad=None):
     import matplotlib.colors as col
     import matplotlib.ticker as ticker
     from mpl_toolkits.axes_grid1.axes_grid import CbarAxes
@@ -233,7 +235,7 @@ def setColorBar(TT,fig,cbax,log=False,blw=1.0,cblabel=r"$z$",subs=[1.0],**kw):
     else:
         ax = cbax
         cax = None
-        kw = {'pad': 0.0}
+        kw = {'pad': pad}
 
     if log:
         cbticks = ticker.LogLocator(base=10.0, subs=subs)

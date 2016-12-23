@@ -41,6 +41,24 @@ pp.theContours(ax,x,y,z,colors=['r','b'])
 
 ## Gradient plot ##
 
+``` python
+import PypersPlots as pp
+import numpy as np
+import colorcet as cc
+N = 150
+data = "temperature.dat"
+fname = 'gradient'
+x, y, T = pp.dataExtract3col(data, N)
+fig, ax = pp.initPlot()
+fig.canvas.draw_idle()
+CM = pp.theGradient(ax,x,y,T, (0.0, 1.e2),cmap=cc.cm['inferno'])
+pp.decor(ax,xlabel=r"$\mathcal{X}$",ylabel=r"$\mathcal{Y}$")
+CB = pp.setColorBar(CM,fig,ax,cblabel=r"$\mathcal{L}$",pad=0.05)
+pp.printer(fig,'gradient')
+
+```
+![](README_figs/gradient.png)
+
 ## More elaborate example examples ##
 
 ### Streams and fields ###
@@ -53,22 +71,24 @@ pp.theContours(ax,x,y,z,colors=['r','b'])
 ### Magnetobremsstrahlung ###
 ![](README_figs/mbs.png)
 
-To see how these examples were produced go to the wiki. I will be placing more elaborated stuff there.
+To see how these examples were produced go to the wiki. I will be placing
+more elaborated stuff there.
 
 # Recomendations and observations #
 
 ## Interacting with Python ##
-For a good interactive plotting I suggest using IPython. Once inside call
-the magic command `%%matplotlib osx`, if you are using macOS:
+For a good interactive plotting I suggest using IPython (v2.7). Once in the
+command line call the magic command `%%matplotlib osx`, if you are using
+macOS:
 
-``` jupyter-notebook
-%%matplotlib osx
+``` python
+%matplotlib osx
+```
+To see the backends available for matplotlib just type:
+``` python
+%matplotlib -l
 ```
 
-## About the output ##
-Something that must be pointed out is that the PNG image will not have the
-correct characters. However the PDF and PGF will.
-
-##  ##
+## For your benefit ##
 
 This module is under development. Any issue, comment and upgrades are most welcome.

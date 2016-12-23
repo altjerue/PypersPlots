@@ -6,8 +6,8 @@ This is a library intended to produce ready to publish (and not so heavy) plots.
   * matplotlib
   * numpy
   * scipy
-  * h5py (optional)
-  * colorcet (optional)
+  * h5py
+  * [colorcet](https://bokeh.github.io/colorcet/) (optional)
   * [imgtops](http://imgtops.sourceforge.net/)
 
 # Examples #
@@ -41,11 +41,39 @@ pp.theContours(ax,x,y,z,colors=['r','b'])
 
 ## Gradient plot ##
 
-## Gradient and contours plot ##
+``` python
+import numpy as np
+import PypersPlots as pp
+from matplotlib.offsetbox import AnchoredText
+from matplotlib.patheffects import withStroke
+N = 150
+data = "sL_sR_T.dat"
+fname = data.split(".")[0]
+sL, sR, TFS = pp.dataExtract3col(data, N)
+sL, sR, TRS = pp.dataExtract3col(data, N, cols=(0,1,3))
+fig, grid = pp.initGrid(ncols=2,cbmode="single",fscale=1.25)
 
-## A more elaborate example ##
+for ax, T, title in zip(grid, [TFS, TRS], ['FS', 'RS']):
+    CM = pp.theGradient(ax, sL, sR, T, (1.0, 5e2))
+    at = AnchoredText(title, loc=4, prop=dict(size=12),
+                      pad=0., borderpad=0.5,
+                      frameon=False)
+    at.txt._text.set_path_effects([withStroke(foreground="w", linewidth=2)])
+    ax.add_artist(at)
+grid.axes_llc.set_xticks(range(-5,3))
+CB = pp.setColorBar(CM,fig,grid.cbar_axes[0],cblabel=r"$\mathcal{L}$",log=True, subs=[1.,3.,5.])
+pp.decor(grid[0],xlabel=r"$\mathcal{X}$",ylabel=r"$\mathcal{Y}$")
+pp.decor(grid[1],xlabel=r"$\mathcal{X}$")
+pp.printer(fig,'gradient')
+```
 
+## More elaborate example examples ##
+
+### Streams and fields ###
 ![](README_figs/fields_and_streams.png)
+
+### Magnetobremsstrahlung ###
+![](README_figs/mbs.png)
 
 To produce these examples go to the wiki. I will be placing more elaborated stuff there.
 

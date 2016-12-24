@@ -66,7 +66,7 @@ pp.printer(fig,'gradient')
 
 ### Temperature profiles from internal shocks simulations ###
 
-![](README_figs/gradient.png)
+![](README_figs/sL_sR_T.png)
 
 ### Magnetobremsstrahlung ###
 ![](README_figs/mbs.png)

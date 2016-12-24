@@ -11,12 +11,12 @@ def figsize(scale,landscape=True,ratio=None):
         fig_width = fig_width_pt*inches_per_pt*scale    # width in inches
         fig_height = fig_width/ratio              # height in inches
     else:
-        fig_width = fig_width_pt*inches_per_pt*scale    # width in inches
-        fig_height = fig_width*ratio              # height in inches
+        fig_height = fig_width_pt*inches_per_pt*scale    # width in inches
+        fig_width = fig_height/ratio              # height in inches
     fig_size = [fig_width,fig_height]
     return fig_size
 
-def latexify(fscale=1.0,ratio=None):
+def latexify(fscale=1.0,ratio=None,landscape=True):
     """Define the matplotlib preamble.
 
     The PGF preamble corresponds to the latex preamble in MNRAS class. It
@@ -29,9 +29,9 @@ def latexify(fscale=1.0,ratio=None):
     mpl.backend_bases.register_backend('pgf', FigureCanvasPgf)
     rc_mnras_preamble = {
         "text.usetex": False,        # use LaTeX to write all text
-        "axes.labelsize": 16,        # fontsize for x and y labels (was 10)
+        "axes.labelsize": 12,        # fontsize for x and y labels (was 10)
         "legend.fontsize": 10,       # was 10
-        "figure.figsize": figsize(fscale,ratio=ratio),  # default fig size of 0.9 textwidth
+        "figure.figsize": figsize(fscale,landscape=landscape, ratio=ratio),
         "figure.autolayout": True,
         "savefig.transparent": True,
         "savefig.dpi": 300,
@@ -58,7 +58,7 @@ def initPlot(nrows=1,ncols=1,landscape=True,fscale=1.0,ratio=None):
     * fig: Figure class.
 
     """
-    latexify(fscale=fscale,ratio=ratio)
+    latexify(fscale=fscale,ratio=ratio,landscape=landscape)
     from matplotlib import figure
     import matplotlib.pyplot as plt
 
@@ -87,7 +87,7 @@ def initGrid(nrows=1,ncols=1,cbloc="right",cbmode="each",landscape=True,fscale=1
     fig: Figure
     ax : array_like
     """
-    latexify(fscale=fscale,ratio=ratio)
+    latexify(fscale=fscale,ratio=ratio,landscape=landscape)
     import matplotlib.pyplot as plt
     from matplotlib import figure
     from mpl_toolkits.axes_grid1 import AxesGrid
@@ -173,12 +173,12 @@ def printer(fig,fname, savedir="./", onscreen=False, rasterd=True, printPNG=Fals
     print('  Printing: done')
 
 ## The contour plots
-def theContours(ax, v1, v2, t, clim=None, numl=None, clabels=False, logsep=False, fmt='%1.0f', levs=[1], labelpos=[0], rasterd=True, colors='k'):
+def theContours(ax, v1, v2, t, clim=None, numl=None, clabels=False, logsep=False, fmt='%1.0f', levs=None, labelpos=None, rasterd=True, colors='k'):
     """ Setting the contour lines.
     """
     import numpy as np
     if numl is None:
-        if len(levs) == 1 and levs[0] == 1:
+        if levs is None:
             CS = ax.contour(v1, v2, t, colors=colors, lw=1.0, rasterized=rasterd)
         else:
             CS = ax.contour(v1, v2, t, levels=levs, colors=colors, lw=1.0, rasterized=rasterd)
@@ -192,8 +192,10 @@ def theContours(ax, v1, v2, t, clim=None, numl=None, clabels=False, logsep=False
         CS = ax.contour(v1, v2, t, levels=levs, colors=colors, lw=1.0, rasterized=rasterd)
 
     if clabels:
-        if len(labelpos) == 1 and labelpos[0] == 0:
+        if labelpos is None or labelpos is False:
             ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=False)
+        elif labelpos:
+            ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=labelpos)
         else:
             ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=labelpos)
     return CS
@@ -260,76 +262,3 @@ def setColorBar(TT,fig,cbax,log=False,blw=1.0,cblabel=r"$z$",subs=[1.0],pad=None
     CB.cmap.set_under(color='k')
     CB.cmap.set_over(color='w')
     return CB
-
-############################################################################
-#           EXTRACTING DATA
-############################################################################
-
-def dataExtract3col(filename, N, cols=(0,1,2),rescale=False):
-    """contourExtract4(filename, N, cols=(0,1,2))
-
-    Four columns extraction routine. Getting data ready for contour
-    plotting.
-
-    filename: string
-    Name of the file with at least four columns.
-
-    N: int
-    Size of the temporal arrays to generate the grid.
-
-    cols: tuple
-    Tuple of three int referring to the columns to be read.
-    """
-    import numpy as np
-    import scipy.interpolate
-    v1, v2, tt = np.loadtxt(filename, usecols=cols, unpack=True)
-    v1i = np.linspace(v1.min(), v1.max(), N)
-    v2i = np.linspace(v2.min(), v2.max(), N)
-    ti = scipy.interpolate.griddata((v1, v2), tt,
-                                    (v1i[None,:], v2i[:,None]),
-                                    method='cubic', rescale=rescale
-    )
-    return v1i, v2i, ti
-
-def hdf5Extract2D(h5file, ds1, ds2):
-    """ hdf5Extraxt(h5file)
-
-    Extract data from an HDF5 data file.
-
-    h5file: string
-    File name.
-
-    ds1,ds2: strings
-    1D data set names
-
-    """
-    import h5py as h5
-
-    h5f = h5.File(h5file, 'r')
-    v1 = emissTable[ds1][:]
-    v2 = emissTable[ds2][:]
-
-    return v1,v2
-
-def hdf5Extract3D(h5file, ds1, ds2, ds3):
-    """ hdf5Extraxt(h5file)
-
-    Extract data from an HDF5 data file.
-
-    h5file: string
-    File name.
-
-    ds1,ds2: strings
-    1D data set names
-
-    ds3:
-    2D  data set names
-    """
-    import h5py as h5
-
-    h5f = h5.File(h5file, 'r')
-    v1 = emissTable[ds1][:]
-    v2 = emissTable[ds2][:]
-    v3 = emissTable[ds3][:,:]
-
-    return v1,v2,v3

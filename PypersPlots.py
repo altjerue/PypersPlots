@@ -24,6 +24,7 @@ def latexify(fscale=1.0,ratio=None,landscape=True):
     """
     import matplotlib as mpl
     from matplotlib.backends.backend_pgf import FigureCanvasPgf
+    mpl.use('pgf')
     mpl.backend_bases.register_backend('pdf', FigureCanvasPgf)
     mpl.backend_bases.register_backend('png', FigureCanvasPgf)
     mpl.backend_bases.register_backend('pgf', FigureCanvasPgf)
@@ -49,6 +50,12 @@ def latexify(fscale=1.0,ratio=None,landscape=True):
         ]
     }
     mpl.rcParams.update(rc_mnras_preamble)
+
+def inserTeXpreamble(preamble):
+    import matplotlib as mpl
+    for p in preamble:
+        mpl.rcParams["pgf.preamble"].append(p)
+    mpl.rcParams.update()
 
 def initPlot(nrows=1,ncols=1,landscape=True,fscale=1.0,ratio=None):
     """Initializing plot.
@@ -235,7 +242,7 @@ def theGradient(ax, v1, v2, t, cmlim, v1label=r"$x$", v2label="$y$", tlabel="$z$
 
     return CM
 
-def setColorBar(TT,fig,cbax,log=False,blw=1.0,cblabel=r"$z$",subs=[1.0],pad=0.1,borders=True, borcol=[]):
+def setColorBar(TT,fig,cbax,log=False,blw=1.0,cblabel=r"$z$",subs=[1.0],pad=0.01,borders=True, borcol=[]):
     import matplotlib.colors as col
     import matplotlib.ticker as ticker
     from mpl_toolkits.axes_grid1.axes_grid import CbarAxes

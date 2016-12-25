@@ -42,13 +42,14 @@ pp.theContours(ax,x,y,z,colors=['r','b'])
 ## Gradient plot ##
 
 ``` python
-import PypersPlots as pp
 import numpy as np
+import PypersPlots as pp
+import extractor as ext
 import colorcet as cc
 N = 150
 data = "temperature.dat"
 fname = 'gradient'
-x, y, T = pp.dataExtract3col(data, N)
+x, y, T = ext.dataExtract3col(data, N)
 fig, ax = pp.initPlot()
 fig.canvas.draw_idle()
 CM = pp.theGradient(ax,x,y,T, (0.0, 1.e2),cmap=cc.cm['inferno'])
@@ -65,7 +66,6 @@ pp.printer(fig,'gradient')
 ![](README_figs/fields_and_streams.png)
 
 ### Temperature profiles from internal shocks simulations ###
-
 ![](README_figs/sL_sR_T.png)
 
 ### Magnetobremsstrahlung ###

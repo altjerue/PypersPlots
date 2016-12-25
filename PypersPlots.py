@@ -200,7 +200,7 @@ def theContours(ax, v1, v2, t, clim=None, numl=None, clabels=False, logsep=False
             ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=labelpos)
     return CS
 
-def theGradient(ax, v1, v2, t, cmlim, v1label=r"$x$", v2label="$y$", tlabel="$z$", LNorm=False, cmap=None, xlim=(0.0,3.0), ylim=(0.0,3.0), rasterd=True):
+def theGradient(ax, v1, v2, t, cmlim, v1label=r"$x$", v2label="$y$", tlabel="$z$", LNorm=False, cmap=None, xlim=(0.0,3.0), ylim=(0.0,3.0), rasterd=True, xlog=False, ylog=False, xylog=False):
     """Setting the contour gradient plot.
     """
     import matplotlib.colors as col
@@ -224,12 +224,25 @@ def theGradient(ax, v1, v2, t, cmlim, v1label=r"$x$", v2label="$y$", tlabel="$z$
                            norm=col.Normalize(vmin=cm_min, vmax=cm_max),
                            rasterized=rasterd
         )
+
+    if xylog:
+        xlog = ax.set_xscale('log')
+        ylog = ax.set_yscale('log')
+    elif xlog:
+        ax.set_xscale('log')
+    elif ylog:
+        ax.set_yscale('log')
+
     return CM
 
-def setColorBar(TT,fig,cbax,log=False,blw=1.0,cblabel=r"$z$",subs=[1.0],pad=None):
+def setColorBar(TT,fig,cbax,log=False,blw=1.0,cblabel=r"$z$",subs=[1.0],pad=0.1,borders=True, borcol=[]):
     import matplotlib.colors as col
     import matplotlib.ticker as ticker
     from mpl_toolkits.axes_grid1.axes_grid import CbarAxes
+
+    kw = { 'extendfrac' : 0.01,
+           'extend' : 'both'
+    }
 
     if type(cbax) == CbarAxes:
         ax = None
@@ -237,14 +250,12 @@ def setColorBar(TT,fig,cbax,log=False,blw=1.0,cblabel=r"$z$",subs=[1.0],pad=None
     else:
         ax = cbax
         cax = None
-        kw = {'pad': pad}
+        kw.update({'pad': pad})
 
     if log:
         cbticks = ticker.LogLocator(base=10.0, subs=subs)
         CB = fig.colorbar(TT, cax=cax, ax=ax,
                           extendrect = True,
-                          extend = 'both',
-                          extendfrac = 0.01,
                           ticks = cbticks,
                           format = ticker.LogFormatter(base=10.0, labelOnlyBase=False),
                           **kw
@@ -252,13 +263,16 @@ def setColorBar(TT,fig,cbax,log=False,blw=1.0,cblabel=r"$z$",subs=[1.0],pad=None
     else:
         CB = fig.colorbar(TT, cax=cax, ax=ax,
                           extendrect=True,
-                          extend='both',
-                          extendfrac=0.01,
                           **kw
         )
     CB.set_label(cblabel)
     CB.ax.tick_params(which='major', length=0)
     CB.outline.set_linewidth(blw)
-    CB.cmap.set_under(color='k')
-    CB.cmap.set_over(color='w')
+    if borders is True:
+        if len(borcol) == 0:
+            CB.cmap.set_under(color='k')
+            CB.cmap.set_over(color='w')
+        else:
+            CB.cmap.set_under(color=borcol[0])
+            CB.cmap.set_over(color=borcol[1])
     return CB

@@ -10,6 +10,18 @@ This is a library intended to produce ready to publish (and not so heavy) plots.
   * [colorcet](https://bokeh.github.io/colorcet/) (optional)
   * [imgtops](http://imgtops.sourceforge.net/)
 
+All packages can be installed via pip
+``` shell
+$ pip install <package-name>
+```
+except imgtops, which is a tool not in the PyPI.
+
+[imgtops can be downloaded from here](http://imgtops.sourceforge.net/). In
+order to have imgtops properly installed I did the following:
+
+    * Install python package `pillow`
+    * Modify the `setup.py`. Change PIL for pillow
+
 # Examples #
 
 ## Linear plot ##
@@ -31,11 +43,14 @@ pp.printer(fig,'sin')
 
 ``` python
 import numpy as np
-import Pypers as pp
-x, y = np.meshgrid(*(np.linspace(-1,1,500),)*2)
+import PypersPlots as pp
+pp.latexify()
+x, y = np.meshgrid(*(np.linspace(-0.6,0.6,500),)*2)
 z = np.sin(20*x**2)*np.cos(30*y)
-fig,ax = initPlot()
-pp.theContours(ax,x,y,z,colors=['r','b'])
+fig,ax = pp.initPlot()
+CS = pp.theContours(ax,x,y,z)
+pp.decor(ax,ylabel=r"$\mathcal{Y}$",xlabel=r"$\mathcal{X}$")
+pp.printer(fig,'contours')
 ```
 ![](README_figs/contours.png)
 
@@ -78,7 +93,7 @@ more elaborated stuff there.
 
 ## Interacting with Python ##
 For a good interactive plotting I suggest using IPython (v2.7). Once in the
-command line call the magic command `%%matplotlib osx`, if you are using
+command line call the magic command `%matplotlib osx`, if you are using
 macOS:
 
 ``` python

@@ -1,11 +1,14 @@
 #!/usr/bin/env python -tt
 
-def figsize(scale,landscape=True,ratio=None):
+def figsize(scale, landscape=True, ratio=None, txtwidth=None):
     import numpy as np
-    fig_width_pt = 469.755                          # Get this from LaTeX using \the\textwidth
-    inches_per_pt = 1.0/72.27                       # Convert pt to inch
+    if txtwidth is None:          # Get this from LaTeX using \the\textwidth
+        fig_width_pt = 469.755
+    else:
+        fig_width_pt = txtwidth
+    inches_per_pt = 1.0/72.27     # Convert pt to inch
     if ratio is None:
-        golden_mean = 2.0/(np.sqrt(5.0)-1.0)        # Aesthetic ratio (you could change this)
+        golden_mean = 2.0/(np.sqrt(5.0)-1.0)  # Aesthetic ratio (you could change this)
         ratio = golden_mean
     if landscape:
         fig_width = fig_width_pt*inches_per_pt*scale    # width in inches
@@ -16,7 +19,7 @@ def figsize(scale,landscape=True,ratio=None):
     fig_size = [fig_width,fig_height]
     return fig_size
 
-def latexify(fscale=1.0,ratio=None,landscape=True):
+def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None):
     """Define the matplotlib preamble.
 
     The PGF preamble corresponds to the latex preamble in MNRAS class. It
@@ -31,12 +34,22 @@ def latexify(fscale=1.0,ratio=None,landscape=True):
     rc_mnras_preamble = {
         "text.usetex": False,        # use LaTeX to write all text
         "axes.labelsize": 12,        # fontsize for x and y labels (was 10)
-        "legend.fontsize": 10,       # was 10
-        "figure.figsize": figsize(fscale,landscape=landscape, ratio=ratio),
+        "legend.fontsize": 10,
+        "legend.labelspacing": 0.1,
+        "legend.borderpad": 0.15,
+        "legend.handletextpad": 0.5,
+        "legend.handlelength": 2.5,
+        "legend.borderaxespad": 0.7,
+        "figure.figsize": figsize(fscale,landscape=landscape, ratio=ratio, txtwidth=txtwdth),
         "figure.autolayout": True,
+        "lines.linewidth": 1.0,
+        "xtick.major.width": 1.0,
+        "xtick.minor.width": 1.0,
+        "ytick.major.width": 1.0,
+        "ytick.minor.width": 1.0,
         "savefig.transparent": True,
         "savefig.dpi": 300,
-        "pgf.texsystem": "lualatex",        # change this if using xelatex or lualatex
+        "pgf.texsystem": "lualatex",
         "pgf.rcfonts": False,
         "pgf.preamble": [
             r"\let\mit=\mathnormal",
@@ -57,7 +70,7 @@ def inserTeXpreamble(preamble):
         mpl.rcParams["pgf.preamble"].append(p)
     mpl.rcParams.update()
 
-def initPlot(nrows=1,ncols=1,landscape=True,fscale=1.0,ratio=None):
+def initPlot(nrows=1,ncols=1,landscape=True,fscale=1.0,ratio=None,txtw=None):
     """Initializing plot.
 
     Return:
@@ -65,7 +78,7 @@ def initPlot(nrows=1,ncols=1,landscape=True,fscale=1.0,ratio=None):
     * fig: Figure class.
 
     """
-    latexify(fscale=fscale,ratio=ratio,landscape=landscape)
+    latexify(fscale=fscale,ratio=ratio,landscape=landscape,txtwdth=txtw)
     from matplotlib import figure
     import matplotlib.pyplot as plt
 
@@ -99,10 +112,10 @@ def initGrid(nrows=1,ncols=1,cbloc="right",cbmode="each",landscape=True,fscale=1
     from matplotlib import figure
     from mpl_toolkits.axes_grid1 import AxesGrid
 
-    wh = plt.rcParams['figure.figsize']
+    #wh = plt.rcParams['figure.figsize']
     plt.close('all')
 
-    fig = plt.figure(figsize=(wh[0],wh[1]))
+    fig = plt.figure()#figsize=(wh[0],wh[1]))
     grid = AxesGrid(fig, 111,
                     nrows_ncols=(nrows, ncols),
                     add_all=True,
@@ -114,13 +127,21 @@ def initGrid(nrows=1,ncols=1,cbloc="right",cbmode="each",landscape=True,fscale=1
     )
     return fig, grid
 
-def decor(ax,xlim=None,ylim=None,xlabel=r"$x$",ylabel=r"$y$",lw=1.0,tlabelsize=10,minticks_on=True,gridon=False):
+def decor(ax, xlim=None, ylim=None, xlabel=r"$x$", ylabel=r"$y$", axlw=1.0, axlabs=None, tlabs=None, minticks_on=True, gridon=False):
     if minticks_on:
         ax.minorticks_on()
-        ax.tick_params(axis='both', which='minor', length=3, width=lw)
-    ax.tick_params(axis='both', which='major', length=6, width=lw, labelsize=tlabelsize)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
+        ax.tick_params(axis='both', which='minor', length=3, width=axlw)
+
+    if tlabs is None:
+        ax.tick_params(axis='both', which='major', length=6, width=axlw)
+    else:
+        ax.tick_params(axis='both', which='major', length=6, width=axlw, labelsize=tlabs)
+    if axlabs is None:
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+    else:
+        ax.set_xlabel(xlabel, size=axlabs)
+        ax.set_ylabel(ylabel, size=axlabs)
 
     if xlim is None:
         xlim = ax.get_xlim()
@@ -130,17 +151,16 @@ def decor(ax,xlim=None,ylim=None,xlabel=r"$x$",ylabel=r"$y$",lw=1.0,tlabelsize=1
     ax.set_ylim(ylim)
 
     for axis in ['top','bottom','left','right']:
-        ax.spines[axis].set_linewidth(lw)
+        ax.spines[axis].set_linewidth(axlw)
         ax.spines[axis].set_color('black')
 
     if gridon:
         ax.grid()
 
-def printer(fig,fname, savedir="./", onscreen=False, rasterd=True, printPNG=False, printPDF=True, delPNG=True):
+def printer(fig, fname, savedir="./", onscreen=False, rasterd=True, printPNG=False, printPDF=True, delPNG=True):
     if onscreen:
-        #import matplotlib.pyplot as plt
+        fig.set_tight_layout({'pad':0.01})
         fig.suptitle(fname)
-        fig.set_tight_layout({'pad':0.1})
         fig.show()
     else:
         import subprocess as sp
@@ -153,9 +173,9 @@ def printer(fig,fname, savedir="./", onscreen=False, rasterd=True, printPNG=Fals
 
         fig.savefig(fullname + '.pgf', format='pgf', rasterized=True)
         counter = 0
-        for lsitem in os.listdir(savedir):
+        for item in os.listdir(savedir):
             img_name = "-img%d" % (counter)
-            if lsitem.endswith(img_name + ".png"):
+            if item.endswith(img_name + ".png") and item.startswith(fname):
                 im = sp.Popen(['imgtops', '-3', '-e', fullname + img_name + ".png"], stdout=sp.PIPE)
                 imEPS, imerr = im.communicate()
                 imEPSf = open(fullname + img_name + ".eps", 'w')

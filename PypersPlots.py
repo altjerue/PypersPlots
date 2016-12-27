@@ -36,8 +36,8 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None):
         "axes.labelsize": 12,        # fontsize for x and y labels (was 10)
         "legend.fontsize": 10,
         "legend.labelspacing": 0.1,
-        "legend.borderpad": 0.15,
-        "legend.handletextpad": 0.5,
+        "legend.borderpad": 0.4,
+        "legend.handletextpad": 0.3,
         "legend.handlelength": 2.5,
         "legend.borderaxespad": 0.7,
         "figure.figsize": figsize(fscale,landscape=landscape, ratio=ratio, txtwidth=txtwdth),
@@ -45,8 +45,10 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None):
         "lines.linewidth": 1.0,
         "xtick.major.width": 1.0,
         "xtick.minor.width": 1.0,
+        "xtick.labelsize": 10,
         "ytick.major.width": 1.0,
         "ytick.minor.width": 1.0,
+        "ytick.labelsize": 10,
         "savefig.transparent": True,
         "savefig.dpi": 300,
         "pgf.texsystem": "lualatex",
@@ -70,7 +72,7 @@ def inserTeXpreamble(preamble):
         mpl.rcParams["pgf.preamble"].append(p)
     mpl.rcParams.update()
 
-def initPlot(nrows=1,ncols=1,landscape=True,fscale=1.0,ratio=None,txtw=None):
+def initPlot(nrows=1, ncols=1, landscape=True, fscale=1.0, shareY=False, shareX=False, ratio=None, txtw=None):
     """Initializing plot.
 
     Return:
@@ -82,10 +84,10 @@ def initPlot(nrows=1,ncols=1,landscape=True,fscale=1.0,ratio=None,txtw=None):
     from matplotlib import figure
     import matplotlib.pyplot as plt
 
-    wh = plt.rcParams['figure.figsize']
+    #wh = plt.rcParams['figure.figsize']
     plt.close('all')
-    fig, ax = plt.subplots(nrows=nrows, ncols=ncols)
-    fig.set_size_inches(wh[0],wh[1])
+    fig, ax = plt.subplots(nrows=nrows, ncols=ncols, sharey=shareY, sharex=shareX, gridspec_kw={'hspace': 0., 'wspace': 0.})
+    #fig.set_size_inches(wh[0],wh[1])
 
     return fig,ax
 
@@ -127,7 +129,7 @@ def initGrid(nrows=1,ncols=1,cbloc="right",cbmode="each",landscape=True,fscale=1
     )
     return fig, grid
 
-def decor(ax, xlim=None, ylim=None, xlabel=r"$x$", ylabel=r"$y$", axlw=1.0, axlabs=None, tlabs=None, minticks_on=True, gridon=False):
+def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, axlw=1.0, axlabs=None, tlabs=None, minticks_on=True, gridon=False):
     if minticks_on:
         ax.minorticks_on()
         ax.tick_params(axis='both', which='minor', length=3, width=axlw)
@@ -136,12 +138,16 @@ def decor(ax, xlim=None, ylim=None, xlabel=r"$x$", ylabel=r"$y$", axlw=1.0, axla
         ax.tick_params(axis='both', which='major', length=6, width=axlw)
     else:
         ax.tick_params(axis='both', which='major', length=6, width=axlw, labelsize=tlabs)
-    if axlabs is None:
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
-    else:
-        ax.set_xlabel(xlabel, size=axlabs)
-        ax.set_ylabel(ylabel, size=axlabs)
+    if xlabel is not None:
+        if axlabs is None:
+            ax.set_xlabel(xlabel)
+        else:
+            ax.set_xlabel(xlabel, size=axlabs)
+    if ylabel is not None:
+        if axlabs is None:
+            ax.set_ylabel(ylabel)
+        else:
+            ax.set_ylabel(ylabel, size=axlabs)
 
     if xlim is None:
         xlim = ax.get_xlim()
@@ -158,8 +164,8 @@ def decor(ax, xlim=None, ylim=None, xlabel=r"$x$", ylabel=r"$y$", axlw=1.0, axla
         ax.grid()
 
 def printer(fig, fname, savedir="./", onscreen=False, rasterd=True, printPNG=False, printPDF=True, delPNG=True):
+    fig.set_tight_layout({'pad':0.01})
     if onscreen:
-        fig.set_tight_layout({'pad':0.01})
         fig.suptitle(fname)
         fig.show()
     else:

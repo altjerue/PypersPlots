@@ -1,3 +1,5 @@
+from __future__ import division
+
 def interpol(v1,v2,tt,N,logscale=False,rescale=False):
     import numpy as np
     import scipy.interpolate

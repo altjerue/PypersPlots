@@ -57,7 +57,7 @@ def inserTeXpreamble(preamble):
         mpl.rcParams["pgf.preamble"].append(p)
     mpl.rcParams.update()
 
-def initPlot(nrows=1,ncols=1,landscape=True,fscale=1.0,ratio=None):
+def initPlot(nrows=1,ncols=1,landscape=True,fscale=1.0,ratio=None,polar=False):
     """Initializing plot.
 
     Return:
@@ -71,7 +71,10 @@ def initPlot(nrows=1,ncols=1,landscape=True,fscale=1.0,ratio=None):
 
     wh = plt.rcParams['figure.figsize']
     plt.close('all')
-    fig, ax = plt.subplots(nrows=nrows, ncols=ncols)
+    if polar:
+        fig, ax = plt.subplots(nrows=nrows, ncols=ncols, subplot_kw={'projection' : 'polar'})
+    else:
+        fig, ax = plt.subplots(nrows=nrows, ncols=ncols)
     fig.set_size_inches(wh[0],wh[1])
 
     return fig,ax
@@ -114,13 +117,37 @@ def initGrid(nrows=1,ncols=1,cbloc="right",cbmode="each",landscape=True,fscale=1
     )
     return fig, grid
 
-def decor(ax,xlim=None,ylim=None,xlabel=r"$x$",ylabel=r"$y$",lw=1.0,tlabelsize=10,minticks_on=True,gridon=False):
+def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True,labels_kw=None, ticks_kw=None, minticks_on=True, gridon=False, lw=1.0):
+
+    if labels_kw is None:
+        labels_kw = {
+            "width" : 1.0
+        }
+
+    if ticks_kw is None:
+        ticks_kw = {
+            "labelsize" : 10,
+            "width"     : 1.0
+        }
+
+    if xticks:
+        ax.tick_params(axis='x', which='major', length=6, **ticks_kw)
+    else:
+        ax.tick_params(bottom='off', top="off")
+
+    if yticks:
+        ax.tick_params(axis='y', which='major', length=6, **ticks_kw)
+    else:
+        ax.tick_params(right='off', left="off")
+
     if minticks_on:
         ax.minorticks_on()
-        ax.tick_params(axis='both', which='minor', length=3, width=lw)
-    ax.tick_params(axis='both', which='major', length=6, width=lw, labelsize=tlabelsize)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
+        ax.tick_params(axis='both', which='minor', length=3, width=ticks_kw['width'])
+
+    if xlabel is not None:
+        ax.set_xlabel(xlabel)
+    if ylabel is not None:
+        ax.set_ylabel(ylabel)
 
     if xlim is None:
         xlim = ax.get_xlim()
@@ -129,9 +156,10 @@ def decor(ax,xlim=None,ylim=None,xlabel=r"$x$",ylabel=r"$y$",lw=1.0,tlabelsize=1
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
 
-    for axis in ['top','bottom','left','right']:
-        ax.spines[axis].set_linewidth(lw)
-        ax.spines[axis].set_color('black')
+    #['top','bottom','left','right']:
+    for axis in ax.spines.keys():
+         ax.spines[axis].set_linewidth(lw)
+         ax.spines[axis].set_color('black')
 
     if gridon:
         ax.grid()
@@ -207,14 +235,14 @@ def theContours(ax, v1, v2, t, clim=None, numl=None, clabels=False, logsep=False
             ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=labelpos)
     return CS
 
-def theGradient(ax, v1, v2, t, cmlim, v1label=r"$x$", v2label="$y$", tlabel="$z$", LNorm=False, cmap=None, xlim=(0.0,3.0), ylim=(0.0,3.0), rasterd=True, xlog=False, ylog=False, xylog=False):
+def theGradient(ax, v1, v2, t, cmlim, LNorm=False, cmap=None, xlim=(0.0,3.0), ylim=(0.0,3.0), rasterd=True, xlog=False, ylog=False, xylog=False):
     """Setting the contour gradient plot.
     """
     import matplotlib.colors as col
 
-    if cmap is None:
-        import colorcet as cc
-        cmap = cc.cm['bgy']
+    #if cmap is None:
+    #    import colorcet as cc
+    #    cmap = cc.cm['bgy']
 
     cm_min = cmlim[0]
     cm_max = cmlim[1]

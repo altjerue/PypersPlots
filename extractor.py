@@ -34,6 +34,21 @@ def dataExtract3col(filename, N, cols=(0,1,2),rescale=False):
     v1, v2, tt = np.loadtxt(filename, usecols=cols, unpack=True)
     return interpol(v1,v2,tt,N)
 
+def dataExtract2col(filename, cols=(0,1)):
+    """dataExtract3col(filename, N, cols=(0,1,2))
+
+    Four columns extraction routine. Getting data ready for contour
+    plotting.
+
+    filename: string
+    Name of the file with at least four columns.
+
+    cols: tuple
+    Tuple of two int referring to the columns to be read.
+    """
+    import numpy as np
+    return np.loadtxt(filename, usecols=cols, unpack=True)
+
 def hdf5ExtractScalar(h5file, dsets, group=None):
     """Extract data from an HDF5 data file.
 

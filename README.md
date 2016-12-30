@@ -95,7 +95,6 @@ more elaborated stuff there.
 For a good interactive plotting I suggest using IPython (v2.7). Once in the
 command line call the magic command `%matplotlib osx`, if you are using
 macOS:
-
 ``` python
 %matplotlib osx
 ```
@@ -106,4 +105,5 @@ To see the backends available for matplotlib just type:
 
 ## For your benefit ##
 
-This module is under development. Any issue, comment and upgrades are most welcome.
+This module is under development. Please if you have any issue, comment or
+upgrades they are most welcome.

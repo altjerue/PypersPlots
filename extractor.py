@@ -1,3 +1,5 @@
+from __future__ import division
+
 def interpol(v1,v2,tt,N,logscale=False,rescale=False):
     import numpy as np
     import scipy.interpolate
@@ -78,7 +80,7 @@ def hdf5ExtractScalar(h5file, dsets, group=None):
     h5f.close()
     return v
 
-def hdf5Extract1D(h5file, dsets):
+def hdf5Extract1D(h5file, dsets, group=None):
     """Extract data from an HDF5 data file.
 
     h5file: string
@@ -90,12 +92,20 @@ def hdf5Extract1D(h5file, dsets):
     import numpy as np
     import h5py as h5
     h5f = h5.File(h5file, 'r')
-    if type(dsets) is list:
-        v = []
-        for i in range(0, len(dsets)):
-            v.append(h5f[dsets[i]][:])
+    if group is None:
+        if type(dsets) is list:
+            v = []
+            for i in range(0, len(dsets)):
+                v.append(h5f[dsets[i]][:])
+        else:
+            v = h5f[dsets][:]
     else:
-        v = h5f[dsets][:]
+        if type(dsets) is list:
+            v = []
+            for i in range(0, len(dsets)):
+                v.append(h5f[group][dsets[i]][:])
+        else:
+            v = h5f[group][dsets][:]
     h5f.close()
     return v
 
@@ -105,8 +115,8 @@ def hdf5Extract2D(h5file, dsets):
     h5file: string
     File name.
 
-    ds1,ds2: strings
-    1D data set names
+    dsets: string or array of strings
+    2D data set names
     """
     import numpy as np
     import h5py as h5
@@ -120,27 +130,31 @@ def hdf5Extract2D(h5file, dsets):
     h5f.close()
     return v
 
-def hdf5Extract3D(h5file, ds1, ds2, ds3, N, xylog=False,rescale=False):
+def hdf5Extract3D(h5file, dsets, group=None):
     """Extract data from an HDF5 data file.
 
     h5file: string
     File name.
 
-    ds1,ds2: strings
-    1D data set names
-
-    ds3:
-    2D  data set names
+    dsets: strings or array of strings
+    3D data set names
     """
     import numpy as np
-    import scipy.interpolate
     import h5py as h5
     h5f = h5.File(h5file, 'r')
-    if type(dsets) is list:
-        v = []
-        for i in range(0, len(dsets) + 1):
-            v.append(h5f[dsets[i]][:,:,:])
+    if group is None:
+        if type(dsets) is list:
+            v = []
+            for i in range(0, len(dsets)):
+                v.append(h5f[dsets[i]][:,:,:])
+        else:
+            v = h5f[dsets][:]
     else:
-        v = h5f[dsets][:,:,:]
+        if type(dsets) is list:
+            v = []
+            for i in range(0, len(dsets)):
+                v.append(h5f[group][dsets[i]][:,:,:])
+        else:
+            v = h5f[group][dsets][:,:,:]
     h5f.close()
     return v

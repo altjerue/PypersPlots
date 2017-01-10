@@ -19,7 +19,7 @@ def figsize(scale, landscape=True, ratio=None, txtwidth=None):
     fig_size = [fig_width,fig_height]
     return fig_size
 
-def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None):
+def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k'):
     """Define the matplotlib preamble.
 
     The PGF preamble corresponds to the latex preamble in MNRAS class. It
@@ -27,43 +27,56 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None):
     """
     import matplotlib as mpl
     from matplotlib.backends.backend_pgf import FigureCanvasPgf
-    mpl.use('pgf')
+    #mpl.use('pgf')
+
     mpl.backend_bases.register_backend('pdf', FigureCanvasPgf)
     mpl.backend_bases.register_backend('png', FigureCanvasPgf)
     mpl.backend_bases.register_backend('pgf', FigureCanvasPgf)
+
+    pream = [
+        r"\let\mit=\mathnormal",
+        r"\DeclareRobustCommand\cal{\@fontswitch{\relax}{\mathcal}}",
+        r"\SetSymbolFont{symbols}{bold}{OMS}{cmsy}{b}{n}",
+        r"\DeclareSymbolFont{UPM}{U}{eur}{m}{n}",
+        r"\SetSymbolFont{UPM}{bold}{U}{eur}{b}{n}",
+        r"\DeclareSymbolFont{AMSa}{U}{msa}{m}{n}",
+        r"\usepackage{amsmath}",
+        r"\usepackage{txfonts}",
+    ]
+
     rc_mnras_preamble = {
         "text.usetex": False,        # use LaTeX to write all text
+        "text.dvipnghack": True,
+        "text.latex.preamble": pream,
+        "text.latex.unicode": False,
         "axes.labelsize": 'x-large',  # fontsize for x and y labels (was 10)
-        "legend.fontsize": 10,
+        "axes.unicode_minus": False,
+        "axes.edgecolor": edgecol,
         "legend.labelspacing": 0.2,
         "legend.borderpad": 0.4,
         "legend.handletextpad": 0.3,
         "legend.handlelength": 2.5,
         "legend.borderaxespad": 0.7,
-        "figure.figsize": figsize(fscale,landscape=landscape, ratio=ratio, txtwidth=txtwdth),
+        "figure.figsize": figsize(fscale,
+                                  landscape=landscape,
+                                  ratio=ratio,
+                                  txtwidth=txtwdth),
         "lines.linewidth": 1.0,
         "xtick.major.width": 1.0,
         "xtick.minor.width": 1.0,
         "xtick.labelsize": 'medium',
+        "xtick.color": edgecol,
         "ytick.major.width": 1.0,
         "ytick.minor.width": 1.0,
         "ytick.labelsize": 'medium',
+        "ytick.color": edgecol,
         "savefig.transparent": True,
         "savefig.dpi": 300,
         "savefig.bbox": 'tight',
         "savefig.pad_inches": 0.05,
-        "pgf.texsystem": "lualatex",
+        "pgf.texsystem": "pdflatex",
         "pgf.rcfonts": False,
-        "pgf.preamble": [
-            r"\let\mit=\mathnormal",
-            r"\DeclareRobustCommand\cal{\@fontswitch{\relax}{\mathcal}}",
-            r"\SetSymbolFont{symbols}{bold}{OMS}{cmsy}{b}{n}",
-            r"\DeclareSymbolFont{UPM}{U}{eur}{m}{n}",
-            r"\SetSymbolFont{UPM}{bold}{U}{eur}{b}{n}",
-            r"\DeclareSymbolFont{AMSa}{U}{msa}{m}{n}",
-            r"\usepackage{amsmath}",
-            r"\usepackage{txfonts}",
-        ]
+        "pgf.preamble": pream
     }
     mpl.rcParams.update(rc_mnras_preamble)
 
@@ -73,7 +86,7 @@ def inserTeXpreamble(preamble):
         mpl.rcParams["pgf.preamble"].append(p)
     mpl.rcParams.update()
 
-def initPlot(nrows=1, ncols=1, redraw=True, landscape=True, fscale=1.0, shareY=False, shareX=False, ratio=None, txtw=None, polar=False):
+def initPlot(nrows=1, ncols=1, redraw=True, shareY=False, shareX=False, polar=False):
     """Initializing plot.
 
     Return:
@@ -81,7 +94,6 @@ def initPlot(nrows=1, ncols=1, redraw=True, landscape=True, fscale=1.0, shareY=F
     * fig: Figure class.
 
     """
-    latexify(fscale=fscale,ratio=ratio,landscape=landscape,txtwdth=txtw)
     from matplotlib import figure
     import matplotlib.pyplot as plt
 
@@ -103,8 +115,8 @@ def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True
 
     if ticks_kw is None:
         ticks_kw = {
-            #"labelsize" : 10,
-            "width"     : 1.0
+            #"colors" : col,
+            "width"  : 1.0
         }
 
     if xticks:
@@ -119,7 +131,7 @@ def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True
 
     if minticks_on:
         ax.minorticks_on()
-        ax.tick_params(axis='both', which='minor', length=3, width=ticks_kw['width'])
+        ax.tick_params(axis='both', which='minor', length=3, **ticks_kw)
 
     if xlabel is not None:
         ax.set_xlabel(xlabel, **labels_kw)
@@ -135,18 +147,19 @@ def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True
 
     for axis in ax.spines.keys():
          ax.spines[axis].set_linewidth(lw)
-         ax.spines[axis].set_color('black')
 
     if gridon:
         ax.grid()
 
-def printer(fig, fname, savedir="./", onscreen=False, rasterd=True, printPNG=False, printPDF=True, delPNG=True):
+def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=False, printPDF=True, delPNG=True, PNG2EPS=True):
     if onscreen:
         fig.suptitle(fname)
         fig.show()
     else:
         import subprocess as sp
         import os
+        if savedir is None:
+            savedir = os.getcwd() + '/'
         fullname = savedir + fname
         if  printPNG:
             fig.savefig(fullname + '.png', format='png', rasterized=rasterd, frameon=False)
@@ -154,31 +167,49 @@ def printer(fig, fname, savedir="./", onscreen=False, rasterd=True, printPNG=Fal
             fig.savefig(fullname + '.pdf', format='pdf', rasterized=rasterd, frameon=False)
 
         fig.savefig(fullname + '.pgf', format='pgf', rasterized=True, frameon=False)
-        counter = 0
-        for item in os.listdir(savedir):
-            img_name = "-img%d" % (counter)
-            if item.endswith(img_name + ".png") and item.startswith(fname):
-                im = sp.Popen(['imgtops', '-3', '-e', fullname + img_name + ".png"], stdout=sp.PIPE)
-                imEPS, imerr = im.communicate()
-                imEPSf = open(fullname + img_name + ".eps", 'w')
-                imEPSf.write(imEPS)
-                imEPSf.close()
-                if delPNG:
-                    sp.call(['rm', '-f', fullname + img_name + '.png'])
-                counter += 1
 
-        # MODIF PGF FILE (PNG -> EPS & LOC -> FULL LOC)
-        replacements = {'png':'eps', fname:savedir + fname}
-        lines = []
-        with open(fullname + '.pgf') as infile:
-            for line in infile:
-                for src, target in replacements.iteritems():
-                    line = line.replace(src, target)
-                lines.append(line)
-        with open(fullname + '.pgf', 'w') as outfile:
-            for line in lines:
-                outfile.write(line)
+        if PNG2EPS:
 
+            counter = 0
+
+            for item in os.listdir(savedir):
+                img_name = "-img%d" % (counter)
+                if item.endswith(img_name + ".png") and item.startswith(fname):
+                    im = sp.Popen(['imgtops', '-3', '-e', fullname + img_name + ".png"], stdout=sp.PIPE)
+                    imEPS, imerr = im.communicate()
+                    imEPSf = open(fullname + img_name + ".eps", 'w')
+                    imEPSf.write(imEPS)
+                    imEPSf.close()
+                    if delPNG:
+                        sp.call(['rm', '-f', fullname + img_name + '.png'])
+                    counter += 1
+
+            # MODIF PGF FILE (PNG -> EPS & LOC -> FULL LOC)
+            replacements = {'png':'eps', fname: savedir + fname}
+            lines = []
+            with open(fullname + '.pgf') as infile:
+                for line in infile:
+                    for src, target in replacements.iteritems():
+                        line = line.replace(src, target)
+                    lines.append(line)
+            with open(fullname + '.pgf', 'w') as outfile:
+                for line in lines:
+                    outfile.write(line)
+
+        else:
+
+            replacements = {fname: savedir + fname}
+            lines = []
+            with open(fullname + '.pgf') as infile:
+                for line in infile:
+                    for src, target in replacements.iteritems():
+                        line = line.replace(src, target)
+                    lines.append(line)
+            with open(fullname + '.pgf', 'w') as outfile:
+                for line in lines:
+                    outfile.write(line)
+
+    print os.getcwd()
     print('  Printing: done')
 
 ## The contour plots
@@ -244,7 +275,7 @@ def theGradient(ax, v1, v2, t, cmlim, LNorm=False, cmap=None, rasterd=True, xlog
 
     return CM
 
-def setColorBar(TT,fig,lax,blw=1.0,cblabel=r"$z$",subs=[1.0],pad=0.01,borders=True, borcol=[], width=1.0, size=1.0, loc='right'):
+def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01, borders=True, borcol=[], width=1.0, size=1.0, loc='right'):
     import matplotlib.colors as col
     import matplotlib.colorbar as colbar
     import matplotlib.ticker as ticker

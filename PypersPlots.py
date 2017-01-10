@@ -33,24 +33,25 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None):
     mpl.backend_bases.register_backend('pgf', FigureCanvasPgf)
     rc_mnras_preamble = {
         "text.usetex": False,        # use LaTeX to write all text
-        "axes.labelsize": 12,        # fontsize for x and y labels (was 10)
+        "axes.labelsize": 'x-large',  # fontsize for x and y labels (was 10)
         "legend.fontsize": 10,
-        "legend.labelspacing": 0.1,
+        "legend.labelspacing": 0.2,
         "legend.borderpad": 0.4,
         "legend.handletextpad": 0.3,
         "legend.handlelength": 2.5,
         "legend.borderaxespad": 0.7,
         "figure.figsize": figsize(fscale,landscape=landscape, ratio=ratio, txtwidth=txtwdth),
-        "figure.autolayout": True,
         "lines.linewidth": 1.0,
         "xtick.major.width": 1.0,
         "xtick.minor.width": 1.0,
-        "xtick.labelsize": 10,
+        "xtick.labelsize": 'medium',
         "ytick.major.width": 1.0,
         "ytick.minor.width": 1.0,
-        "ytick.labelsize": 10,
+        "ytick.labelsize": 'medium',
         "savefig.transparent": True,
         "savefig.dpi": 300,
+        "savefig.bbox": 'tight',
+        "savefig.pad_inches": 0.05,
         "pgf.texsystem": "lualatex",
         "pgf.rcfonts": False,
         "pgf.preamble": [
@@ -72,7 +73,7 @@ def inserTeXpreamble(preamble):
         mpl.rcParams["pgf.preamble"].append(p)
     mpl.rcParams.update()
 
-def initPlot(nrows=1, ncols=1, landscape=True, fscale=1.0, shareY=False, shareX=False, ratio=None, txtw=None, polar=False):
+def initPlot(nrows=1, ncols=1, redraw=True, landscape=True, fscale=1.0, shareY=False, shareX=False, ratio=None, txtw=None, polar=False):
     """Initializing plot.
 
     Return:
@@ -84,64 +85,25 @@ def initPlot(nrows=1, ncols=1, landscape=True, fscale=1.0, shareY=False, shareX=
     from matplotlib import figure
     import matplotlib.pyplot as plt
 
-    #wh = plt.rcParams['figure.figsize']
-    plt.close('all')
+    if redraw:
+        plt.close('all')
+
     if polar:
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, subplot_kw={'projection' : 'polar'}, sharey=shareY, sharex=shareX, gridspec_kw={'hspace': 0., 'wspace': 0.})
     else:
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, sharey=shareY, sharex=shareX, gridspec_kw={'hspace': 0., 'wspace': 0.})
-    #fig.set_size_inches(wh[0],wh[1])
 
     return fig,ax
 
-def initGrid(nrows=1,ncols=1,cbloc="right",cbmode="each",landscape=True,fscale=1.0,ratio=None):
-    """
-    Function that generates the grid of plots.
-
-    Parameters
-    ----------
-    nrows : int
-    ncols : int
-    cbloc : str
-            right, top
-    cbmode : str
-    landscape : bool
-
-    Returns
-    -------
-    fig: Figure
-    ax : array_like
-    """
-    latexify(fscale=fscale,ratio=ratio,landscape=landscape)
-    import matplotlib.pyplot as plt
-    from matplotlib import figure
-    from mpl_toolkits.axes_grid1 import AxesGrid
-
-    #wh = plt.rcParams['figure.figsize']
-    plt.close('all')
-
-    fig = plt.figure()#figsize=(wh[0],wh[1]))
-    grid = AxesGrid(fig, 111,
-                    nrows_ncols=(nrows, ncols),
-                    add_all=True,
-                    axes_pad=0.,
-                    share_all=True,
-                    label_mode="L",
-                    cbar_location=cbloc,
-                    cbar_mode=cbmode,
-    )
-    return fig, grid
-
 def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True,labels_kw=None, ticks_kw=None, minticks_on=True, gridon=False, lw=1.0):
-
     if labels_kw is None:
         labels_kw = {
-            "width" : 1.0
+            #"size" : 12
         }
 
     if ticks_kw is None:
         ticks_kw = {
-            "labelsize" : 10,
+            #"labelsize" : 10,
             "width"     : 1.0
         }
 
@@ -160,15 +122,9 @@ def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True
         ax.tick_params(axis='both', which='minor', length=3, width=ticks_kw['width'])
 
     if xlabel is not None:
-        if axlabs is None:
-            ax.set_xlabel(xlabel)
-        else:
-            ax.set_xlabel(xlabel, size=axlabs)
+        ax.set_xlabel(xlabel, **labels_kw)
     if ylabel is not None:
-        if axlabs is None:
-            ax.set_ylabel(ylabel)
-        else:
-            ax.set_ylabel(ylabel, size=axlabs)
+        ax.set_ylabel(ylabel, **labels_kw)
 
     if xlim is None:
         xlim = ax.get_xlim()
@@ -177,7 +133,6 @@ def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
 
-    #['top','bottom','left','right']:
     for axis in ax.spines.keys():
          ax.spines[axis].set_linewidth(lw)
          ax.spines[axis].set_color('black')
@@ -186,7 +141,6 @@ def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True
         ax.grid()
 
 def printer(fig, fname, savedir="./", onscreen=False, rasterd=True, printPNG=False, printPDF=True, delPNG=True):
-    fig.set_tight_layout({'pad':0.01})
     if onscreen:
         fig.suptitle(fname)
         fig.show()
@@ -195,11 +149,11 @@ def printer(fig, fname, savedir="./", onscreen=False, rasterd=True, printPNG=Fal
         import os
         fullname = savedir + fname
         if  printPNG:
-            fig.savefig(fullname + '.png', format='png', rasterized=rasterd)
+            fig.savefig(fullname + '.png', format='png', rasterized=rasterd, frameon=False)
         if printPDF:
-            fig.savefig(fullname + '.pdf', format='pdf', rasterized=rasterd)
+            fig.savefig(fullname + '.pdf', format='pdf', rasterized=rasterd, frameon=False)
 
-        fig.savefig(fullname + '.pgf', format='pgf', rasterized=True)
+        fig.savefig(fullname + '.pgf', format='pgf', rasterized=True, frameon=False)
         counter = 0
         for item in os.listdir(savedir):
             img_name = "-img%d" % (counter)
@@ -255,7 +209,7 @@ def theContours(ax, v1, v2, t, clim=None, numl=None, clabels=False, logsep=False
             ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=labelpos)
     return CS
 
-def theGradient(ax, v1, v2, t, cmlim, LNorm=False, cmap=None, xlim=(0.0,3.0), ylim=(0.0,3.0), rasterd=True, xlog=False, ylog=False, xylog=False):
+def theGradient(ax, v1, v2, t, cmlim, LNorm=False, cmap=None, rasterd=True, xlog=False, ylog=False, xylog=False):
     """Setting the contour gradient plot.
     """
     import matplotlib.colors as col
@@ -290,40 +244,39 @@ def theGradient(ax, v1, v2, t, cmlim, LNorm=False, cmap=None, xlim=(0.0,3.0), yl
 
     return CM
 
-def setColorBar(TT,fig,ax,blw=1.0,cblabel=r"$z$",subs=[1.0],pad=0.01,borders=True, borcol=[], width=1.0, size=1.0, pos=False, loc=None):
+def setColorBar(TT,fig,lax,blw=1.0,cblabel=r"$z$",subs=[1.0],pad=0.01,borders=True, borcol=[], width=1.0, size=1.0, loc='right'):
     import matplotlib.colors as col
     import matplotlib.colorbar as colbar
     import matplotlib.ticker as ticker
-    from mpl_toolkits.axes_grid1.axes_grid import CbarAxes
-
     cax_kw = { 'shrink' : size,
-               'panchor': 'C',
-               'anchor': pos,
                'aspect' : 20.0/width,
                'pad' : pad,
-               'location': loc
+               'anchor': 'C'
     }
 
-    col_kw = { 'extendfrac' : 0.01,
-               'extend' : 'both',
-               'extendrect' : True
-    }
+    col_kw = {}
+    if borders is True:
+        col_kw.update({ 'extendfrac' : 0.01,
+                        'extend' : 'both',
+                        'extendrect' : True
+        })
 
-    cax, ckw = colbar.make_axes(ax, **cax_kw)
-
-    # if type(cbax) == CbarAxes:
-    #     ax = None
-    #     cax = cbax
-    # else:
-    #     ax = cbax
-    #     cax = None
-    #     kw.update({'pad': pad})
-
-    if TT.norm == col.LogNorm:
+    if type(TT.norm) == col.LogNorm:
         cbticks = ticker.LogLocator(base=10.0, subs=subs)
-        col_kw.update({'ticks': cbticks, 'format': ticker.LogFormatter(base=10.0, labelOnlyBase=False),})
+        col_kw.update({'ticks': cbticks#,
+                       #'format': ticker.LogFormatter(base=10.0,
+                       #labelOnlyBase=False)
+        })
 
-    CB = fig.colorbar(TT, cax=cax, ax=ax, **col_kw)
+
+    try:
+        list(lax)
+        cax,ckw = colbar.make_axes([ax for ax in lax.flat], **cax_kw)
+    except TypeError:
+        cax, ckw = colbar.make_axes(lax, **cax_kw)
+
+    col_kw.update(ckw)
+    CB = fig.colorbar(TT, cax=cax, use_gridspec=True, **col_kw)
 
     CB.set_label(cblabel)
     CB.ax.tick_params(which='major', length=0)
@@ -335,4 +288,5 @@ def setColorBar(TT,fig,ax,blw=1.0,cblabel=r"$z$",subs=[1.0],pad=0.01,borders=Tru
         else:
             CB.cmap.set_under(color=borcol[0])
             CB.cmap.set_over(color=borcol[1])
+    CB.outline.set_figure(fig)
     return CB

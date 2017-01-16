@@ -123,12 +123,20 @@ def hdf5Extract2D(h5file, dsets):
     import numpy as np
     import h5py as h5
     h5f = h5.File(h5file, 'r')
-    if type(dsets) is list:
-        v = []
-        for i in range(0, len(dsets)):
-            v.append(h5f[dsets[i]][:,:])
+    if group is None:
+        if type(dsets) is list:
+            v = []
+            for i in range(0, len(dsets)):
+                v.append(h5f[dsets[i]][:,:])
+        else:
+            v = h5f[dsets][:,:]
     else:
-        v = h5f[dsets][:,:]
+        if type(dsets) is list:
+            v = []
+            for i in range(0, len(dsets)):
+                v.append(h5f[group][dsets[i]][:,:])
+        else:
+            v = h5f[group][dsets][:,:]
     h5f.close()
     return v
 
@@ -150,7 +158,7 @@ def hdf5Extract3D(h5file, dsets, group=None):
             for i in range(0, len(dsets)):
                 v.append(h5f[dsets[i]][:,:,:])
         else:
-            v = h5f[dsets][:]
+            v = h5f[dsets][:,:,:]
     else:
         if type(dsets) is list:
             v = []
@@ -158,5 +166,34 @@ def hdf5Extract3D(h5file, dsets, group=None):
                 v.append(h5f[group][dsets[i]][:,:,:])
         else:
             v = h5f[group][dsets][:,:,:]
+    h5f.close()
+    return v
+
+def hdf5Extract4D(h5file, dsets, group=None):
+    """Extract data from an HDF5 data file.
+
+    h5file: string
+    File name.
+
+    dsets: strings or array of strings
+    3D data set names
+    """
+    import numpy as np
+    import h5py as h5
+    h5f = h5.File(h5file, 'r')
+    if group is None:
+        if type(dsets) is list:
+            v = []
+            for i in range(0, len(dsets)):
+                v.append(h5f[dsets[i]][:,:,:,:])
+        else:
+            v = h5f[dsets][:,:,:,:]
+    else:
+        if type(dsets) is list:
+            v = []
+            for i in range(0, len(dsets)):
+                v.append(h5f[group][dsets[i]][:,:,:,:])
+        else:
+            v = h5f[group][dsets][:,:,:,:]
     h5f.close()
     return v

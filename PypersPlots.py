@@ -100,10 +100,16 @@ def initPlot(nrows=1, ncols=1, redraw=True, shareY=False, shareX=False, polar=Fa
     if redraw:
         plt.close('all')
 
+    gskw = {}
+    if shareY:
+        gskw.update({'hspace' : 0.0})
+    if shareX:
+        gskw.update({'wspace' : 0.0})
+
     if polar:
-        fig, ax = plt.subplots(nrows=nrows, ncols=ncols, subplot_kw={'projection' : 'polar'}, sharey=shareY, sharex=shareX, gridspec_kw={'hspace': 0., 'wspace': 0.})
+        fig, ax = plt.subplots(nrows=nrows, ncols=ncols, subplot_kw={'projection' : 'polar'}, sharey=shareY, sharex=shareX, gridspec_kw=gskw)
     else:
-        fig, ax = plt.subplots(nrows=nrows, ncols=ncols, sharey=shareY, sharex=shareX, gridspec_kw={'hspace': 0., 'wspace': 0.})
+        fig, ax = plt.subplots(nrows=nrows, ncols=ncols, sharey=shareY, sharex=shareX, gridspec_kw=gskw)
 
     return fig,ax
 
@@ -151,7 +157,7 @@ def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True
     if gridon:
         ax.grid()
 
-def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=False, printPDF=True, delPNG=True, PNG2EPS=True):
+def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=False, printPDF=True, printEPS=False, delPNG=True, PNG2EPS=True):
     if onscreen:
         fig.suptitle(fname)
         fig.show()
@@ -165,7 +171,6 @@ def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=Fal
             fig.savefig(fullname + '.png', format='png', rasterized=rasterd, frameon=False)
         if printPDF:
             fig.savefig(fullname + '.pdf', format='pdf', rasterized=rasterd, frameon=False)
-
         fig.savefig(fullname + '.pgf', format='pgf', rasterized=True, frameon=False)
 
         if PNG2EPS:
@@ -196,6 +201,12 @@ def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=Fal
                 for line in lines:
                     outfile.write(line)
 
+            if printEPS:
+                import matplotlib as mpl
+                from pgf2eps import pgf2eps
+                pream = mpl.rcParams["pgf.preamble"]
+                pgf2eps(fullname, pream)
+
         else:
 
             replacements = {fname: savedir + fname}
@@ -209,7 +220,6 @@ def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=Fal
                 for line in lines:
                     outfile.write(line)
 
-    print os.getcwd()
     print('  Printing: done')
 
 ## The contour plots

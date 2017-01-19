@@ -53,9 +53,12 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k'):
         "axes.unicode_minus": False,
         "axes.edgecolor": edgecol,
         "legend.labelspacing": 0.2,
+        "legend.fancybox": False,
+        "legend.framealpha": 1.0,
+        "legend.edgecolor": edgecol,
         "legend.borderpad": 0.4,
         "legend.handletextpad": 0.3,
-        "legend.handlelength": 2.5,
+        "legend.handlelength": 1.5,
         "legend.borderaxespad": 0.7,
         "figure.figsize": figsize(fscale,
                                   landscape=landscape,
@@ -63,10 +66,14 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k'):
                                   txtwidth=txtwdth),
         "lines.linewidth": 1.0,
         "xtick.major.width": 1.0,
+        "xtick.direction": 'in',
+        "xtick.top": True,
         "xtick.minor.width": 1.0,
         "xtick.labelsize": 'medium',
         "xtick.color": edgecol,
         "ytick.major.width": 1.0,
+        "ytick.direction": 'in',
+        "ytick.right": True,
         "ytick.minor.width": 1.0,
         "ytick.labelsize": 'medium',
         "ytick.color": edgecol,
@@ -113,7 +120,7 @@ def initPlot(nrows=1, ncols=1, redraw=True, shareY=False, shareX=False, polar=Fa
 
     return fig,ax
 
-def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True,labels_kw=None, ticks_kw=None, minticks_on=True, gridon=False, lw=1.0):
+def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True,labels_kw=None, ticks_kw=None, minticks_on=True, gridon=False, lw=1.0, tlen=6.0):
     if labels_kw is None:
         labels_kw = {
             #"size" : 12
@@ -121,23 +128,22 @@ def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True
 
     if ticks_kw is None:
         ticks_kw = {
-            #"colors" : col,
-            "width"  : 1.0
+            "width" : 1.0
         }
 
     if xticks:
-        ax.tick_params(axis='x', which='major', length=6, **ticks_kw)
+        ax.tick_params(axis='x', which='major', length=tlen, **ticks_kw)
     else:
         ax.set_xticklabels([])
 
     if yticks:
-        ax.tick_params(axis='y', which='major', length=6, **ticks_kw)
+        ax.tick_params(axis='y', which='major', length=tlen, **ticks_kw)
     else:
         ax.set_yticklabels([])
 
     if minticks_on:
         ax.minorticks_on()
-        ax.tick_params(axis='both', which='minor', length=3, **ticks_kw)
+        ax.tick_params(axis='both', which='minor', length=tlen/2.0, **ticks_kw)
 
     if xlabel is not None:
         ax.set_xlabel(xlabel, **labels_kw)
@@ -155,7 +161,7 @@ def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True
          ax.spines[axis].set_linewidth(lw)
 
     if gridon:
-        ax.grid()
+        ax.grid(which='both')
 
 def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=False, printPDF=True, printEPS=False, delPNG=True, PNG2EPS=True):
     if onscreen:

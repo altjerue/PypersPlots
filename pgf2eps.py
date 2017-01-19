@@ -21,7 +21,16 @@ def pgf2eps(PGFfig, preamble=[]):
 
         sp.call(['latex', PGFfig])
         sp.call(['dvips', PGFfig + '.dvi', '-o'])
-        sp.call(['ps2eps', '-f', '--resolution=300', PGFfig + '.ps'])
+        print "\n\n**** Generating EPS\n"
+        sp.call(['ps2eps',
+                 '-f',
+                 '-N',
+                 '-H',
+                 '-a',
+                 '-W',
+                 '--resolution=300',
+                 PGFfig + '.ps'
+        ])
         sp.call(['rm', '-f',
                  PGFfig + '.tex',
                  PGFfig + '.dvi',

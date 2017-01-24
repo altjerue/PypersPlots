@@ -70,6 +70,8 @@ def hdf5ExtractScalar(h5file, dsets, group=None):
             v = []
             for i in range(0, len(dsets)):
                 v.append(h5f[dsets[i]][0])
+            v = np.array(v)
+            v = v.squeeze()
         else:
             v = h5f[dsets][0]
     else:
@@ -77,6 +79,8 @@ def hdf5ExtractScalar(h5file, dsets, group=None):
             v = []
             for i in range(0, len(dsets)):
                 v.append(h5f[group][dsets[i]][0])
+            v = np.array(v)
+            v = v.squeeze()
         else:
             v = h5f[group][dsets][0]
     h5f.close()
@@ -99,6 +103,8 @@ def hdf5Extract1D(h5file, dsets, group=None):
             v = []
             for i in range(0, len(dsets)):
                 v.append(h5f[dsets[i]][:])
+            v = np.array(v)
+            v = v.squeeze()
         else:
             v = h5f[dsets][:]
     else:
@@ -106,12 +112,14 @@ def hdf5Extract1D(h5file, dsets, group=None):
             v = []
             for i in range(0, len(dsets)):
                 v.append(h5f[group][dsets[i]][:])
+            v = np.array(v)
+            v = v.squeeze()
         else:
             v = h5f[group][dsets][:]
     h5f.close()
     return v
 
-def hdf5Extract2D(h5file, dsets):
+def hdf5Extract2D(h5file, dsets, group=None):
     """Extract data from an HDF5 data file.
 
     h5file: string
@@ -128,6 +136,8 @@ def hdf5Extract2D(h5file, dsets):
             v = []
             for i in range(0, len(dsets)):
                 v.append(h5f[dsets[i]][:,:])
+            v = np.array(v)
+            v = v.squeeze()
         else:
             v = h5f[dsets][:,:]
     else:
@@ -135,6 +145,8 @@ def hdf5Extract2D(h5file, dsets):
             v = []
             for i in range(0, len(dsets)):
                 v.append(h5f[group][dsets[i]][:,:])
+            v = np.array(v)
+            v = v.squeeze()
         else:
             v = h5f[group][dsets][:,:]
     h5f.close()

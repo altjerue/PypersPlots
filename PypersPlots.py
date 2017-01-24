@@ -11,26 +11,51 @@ def figsize(scale, landscape=True, ratio=None, txtwidth=None):
         golden_mean = 2.0/(np.sqrt(5.0)-1.0)  # Aesthetic ratio (you could change this)
         ratio = golden_mean
     if landscape:
-        fig_width = fig_width_pt*inches_per_pt*scale    # width in inches
-        fig_height = fig_width/ratio              # height in inches
+        fig_width = fig_width_pt*inches_per_pt*scale   # width in inches
+        fig_height = fig_width/ratio                   # height in inches
     else:
-        fig_height = fig_width_pt*inches_per_pt*scale    # width in inches
-        fig_width = fig_height/ratio              # height in inches
+        fig_height = fig_width_pt*inches_per_pt*scale  # height in inches
+        fig_width = fig_height/ratio                   # width in inches
     fig_size = [fig_width,fig_height]
     return fig_size
 
 def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k'):
     """Define the matplotlib preamble.
 
-    The PGF preamble corresponds to the latex preamble in MNRAS class. It
+    The LaTeX preamble here corresponds to the preamble in MNRAS class. It
     can be modified to whatever LaTeX preable needed.
+
+    PARAMETERS:
+
+    fscale
+    ------
+    The size of the plot in terms of its size and height. Default is 1.0.
+
+    ratio
+    -----
+    Aspect ratio of the figure. The default is the golden ratio.
+
+    landscape
+    ---------
+    Landscape if True. Portrait if False.
+
+    twtwdth
+    -------
+    Width of the plot in pts. The default is the text width of a standard
+    LaTeX report. To know the text width in latex just write \the\textwidth
+    (or \the\columnwidth for article class) to get this value.
+
+    edgecol
+    -------
+    Color of the borders and ticks. Default is black ('k'). For dark
+    backgrounds use 'w' for white borders.
     """
     import matplotlib as mpl
     from matplotlib.backends.backend_pgf import FigureCanvasPgf
     #mpl.use('pgf')
 
-    mpl.backend_bases.register_backend('pdf', FigureCanvasPgf)
-    mpl.backend_bases.register_backend('png', FigureCanvasPgf)
+    #mpl.backend_bases.register_backend('pdf', FigureCanvasPgf)
+    #mpl.backend_bases.register_backend('png', FigureCanvasPgf)
     mpl.backend_bases.register_backend('pgf', FigureCanvasPgf)
 
     pream = [
@@ -45,10 +70,11 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k'):
     ]
 
     rc_mnras_preamble = {
-        "text.usetex": False,        # use LaTeX to write all text
+        "text.usetex": True,        # use LaTeX to write all text
         "text.dvipnghack": True,
         "text.latex.preamble": pream,
         "text.latex.unicode": False,
+        "text.latex.preamble": pream,
         "axes.labelsize": 'x-large',  # fontsize for x and y labels (was 10)
         "axes.unicode_minus": False,
         "axes.edgecolor": edgecol,
@@ -66,15 +92,21 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k'):
                                   txtwidth=txtwdth),
         "lines.linewidth": 1.0,
         "xtick.major.width": 1.0,
+        "xtick.minor.width": 1.0,
+        "xtick.major.size": 6.0,
+        "xtick.minor.size": 3.0,
         "xtick.direction": 'in',
         "xtick.top": True,
-        "xtick.minor.width": 1.0,
+        "xtick.minor.visible": True,
         "xtick.labelsize": 'medium',
         "xtick.color": edgecol,
         "ytick.major.width": 1.0,
+        "ytick.minor.width": 1.0,
+        "ytick.major.size": 6.0,
+        "ytick.minor.size": 3.0,
         "ytick.direction": 'in',
         "ytick.right": True,
-        "ytick.minor.width": 1.0,
+        "ytick.minor.visible": True,
         "ytick.labelsize": 'medium',
         "ytick.color": edgecol,
         "savefig.transparent": True,
@@ -82,8 +114,8 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k'):
         "savefig.bbox": 'tight',
         "savefig.pad_inches": 0.05,
         "pgf.texsystem": "pdflatex",
-        "pgf.rcfonts": False,
-        "pgf.preamble": pream
+        #"pgf.rcfonts": False,
+        #"pgf.preamble": pream
     }
     mpl.rcParams.update(rc_mnras_preamble)
 
@@ -120,7 +152,8 @@ def initPlot(nrows=1, ncols=1, redraw=True, shareY=False, shareX=False, polar=Fa
 
     return fig,ax
 
-def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True,labels_kw=None, ticks_kw=None, minticks_on=True, gridon=False, lw=1.0, tlen=6.0):
+def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True, yticks=True, xlog=False, ylog=False, labels_kw=None, ticks_kw=None, minticks_off=False, gridon=False, lw=1.0):
+    from matplotlib.ticker import LogLocator
     if labels_kw is None:
         labels_kw = {
             #"size" : 12
@@ -128,22 +161,30 @@ def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True
 
     if ticks_kw is None:
         ticks_kw = {
-            "width" : 1.0
+            "width" : lw
         }
 
     if xticks:
-        ax.tick_params(axis='x', which='major', length=tlen, **ticks_kw)
+        ax.tick_params(axis='x', which='major', **ticks_kw)
     else:
         ax.set_xticklabels([])
 
     if yticks:
-        ax.tick_params(axis='y', which='major', length=tlen, **ticks_kw)
+        ax.tick_params(axis='y', which='major', **ticks_kw)
     else:
         ax.set_yticklabels([])
 
-    if minticks_on:
-        ax.minorticks_on()
-        ax.tick_params(axis='both', which='minor', length=tlen/2.0, **ticks_kw)
+    if xlog:
+        ax.set_xscale('log')
+        ax.xaxis.set_major_locator(LogLocator(base=10.0))
+        ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs=range(2,10)))
+    if ylog:
+        ax.set_yscale('log')
+        ax.yaxis.set_major_locator(LogLocator(base=10.0))
+        ax.yaxis.set_minor_locator(LogLocator(base=10.0, subs=range(2,10)))
+
+    if minticks_off:
+        ax.minorticks_off()
 
     if xlabel is not None:
         ax.set_xlabel(xlabel, **labels_kw)
@@ -158,7 +199,7 @@ def decor(ax,xlim=None,ylim=None,xlabel=None,ylabel=None,xticks=True,yticks=True
     ax.set_ylim(ylim)
 
     for axis in ax.spines.keys():
-         ax.spines[axis].set_linewidth(lw)
+        ax.spines[axis].set_linewidth(lw)
 
     if gridon:
         ax.grid(which='both')
@@ -174,11 +215,13 @@ def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=Fal
             savedir = os.getcwd() + '/'
         fullname = savedir + fname
         if  printPNG:
-            fig.savefig(fullname + '.png', format='png', rasterized=rasterd, frameon=False)
+            fig.savefig(fullname + '.png', format='png', rasterized=rasterd, frameon=False, transparent=False)
         if printPDF:
             fig.savefig(fullname + '.pdf', format='pdf', rasterized=rasterd, frameon=False)
+        if printEPS:
+            fig.savefig(fullname + '.eps', format='eps', rasterized=rasterd, frameon=False)
         fig.savefig(fullname + '.pgf', format='pgf', rasterized=True, frameon=False)
-
+        
         if PNG2EPS:
 
             counter = 0
@@ -207,11 +250,11 @@ def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=Fal
                 for line in lines:
                     outfile.write(line)
 
-            if printEPS:
-                import matplotlib as mpl
-                from pgf2eps import pgf2eps
-                pream = mpl.rcParams["pgf.preamble"]
-                pgf2eps(fullname, pream)
+            # if printEPS:
+            #     import matplotlib as mpl
+            #     from pgf2eps import pgf2eps
+            #     pream = mpl.rcParams["pgf.preamble"]
+            #     pgf2eps(fullname, pream)
 
         else:
 
@@ -256,14 +299,14 @@ def theContours(ax, v1, v2, t, clim=None, numl=None, clabels=False, logsep=False
             ax.clabel(CS, fontsize=10, inline=True, fmt=fmt, manual=labelpos)
     return CS
 
-def theGradient(ax, v1, v2, t, cmlim, LNorm=False, cmap=None, rasterd=True, xlog=False, ylog=False, xylog=False):
+def theGradient(ax, v1, v2, t, cmlim, LNorm=False, cmap=None, rasterd=True):
     """Setting the contour gradient plot.
     """
     import matplotlib.colors as col
 
-    #if cmap is None:
-    #    import colorcet as cc
-    #    cmap = cc.cm['bgy']
+    if cmap is None:
+       import colorcet as cc
+       cmap = cc.cm['bgy']
 
     cm_min = cmlim[0]
     cm_max = cmlim[1]
@@ -280,14 +323,6 @@ def theGradient(ax, v1, v2, t, cmlim, LNorm=False, cmap=None, rasterd=True, xlog
                            norm=col.Normalize(vmin=cm_min, vmax=cm_max),
                            rasterized=rasterd
         )
-
-    if xylog:
-        xlog = ax.set_xscale('log')
-        ylog = ax.set_yscale('log')
-    elif xlog:
-        ax.set_xscale('log')
-    elif ylog:
-        ax.set_yscale('log')
 
     return CM
 
@@ -310,10 +345,7 @@ def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01, bor
 
     if type(TT.norm) == col.LogNorm:
         cbticks = ticker.LogLocator(base=10.0, subs=subs)
-        col_kw.update({'ticks': cbticks#,
-                       #'format': ticker.LogFormatter(base=10.0,
-                       #labelOnlyBase=False)
-        })
+        col_kw.update({'ticks': cbticks})
 
 
     try:
@@ -326,7 +358,7 @@ def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01, bor
     CB = fig.colorbar(TT, cax=cax, use_gridspec=True, **col_kw)
 
     CB.set_label(cblabel)
-    CB.ax.tick_params(which='major', length=0)
+    CB.ax.tick_params(which='both', length=0.0)
     CB.outline.set_linewidth(blw)
     if borders is True:
         if len(borcol) == 0:
@@ -337,3 +369,10 @@ def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01, bor
             CB.cmap.set_over(color=borcol[1])
     CB.outline.set_figure(fig)
     return CB
+
+def addInset(fig, anchor, wscale=0.05, hscale=0.05):
+
+    w, h = fig.get_size_inches()
+    rect = anchor[0], anchor[1], w*wscale, h*hscale
+    inax = fig.add_axes(rect)
+    return inax

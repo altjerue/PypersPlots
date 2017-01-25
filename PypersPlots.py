@@ -155,9 +155,7 @@ def initPlot(nrows=1, ncols=1, redraw=True, shareY=False, shareX=False, polar=Fa
 def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True, yticks=True, xlog=False, ylog=False, labels_kw=None, ticks_kw=None, minticks_off=False, gridon=False, lw=1.0):
     from matplotlib.ticker import LogLocator
     if labels_kw is None:
-        labels_kw = {
-            #"size" : 12
-        }
+        labels_kw = {}
 
     if ticks_kw is None:
         ticks_kw = {
@@ -315,6 +313,7 @@ def theGradient(ax, v1, v2, t, cmlim, LNorm=False, cmap=None, rasterd=True):
         CM = ax.pcolormesh(v1, v2, t,
                            cmap=cmap,
                            norm=col.LogNorm(vmin=cm_min, vmax=cm_max),
+                           shading='gourard',
                            rasterized=rasterd
         )
     else:
@@ -326,10 +325,16 @@ def theGradient(ax, v1, v2, t, cmlim, LNorm=False, cmap=None, rasterd=True):
 
     return CM
 
-def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01, borders=True, borcol=[], width=1.0, size=1.0, loc='right'):
+def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01, borders=True, borcol=[], width=1.0, size=1.0, loc='right', label_kw=None, ticks_kw=None):
     import matplotlib.colors as col
     import matplotlib.colorbar as colbar
     import matplotlib.ticker as ticker
+    if label_kw is None:
+        label_kw = {}
+        
+    if ticks_kw is None:
+        ticks_kw = {}
+        
     cax_kw = { 'shrink' : size,
                'aspect' : 20.0/width,
                'pad' : pad,
@@ -342,7 +347,9 @@ def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01, bor
                         'extend' : 'both',
                         'extendrect' : True
         })
-
+    else:
+        col_kw.update({'extend': 'neither'})    
+        
     if type(TT.norm) == col.LogNorm:
         cbticks = ticker.LogLocator(base=10.0, subs=subs)
         col_kw.update({'ticks': cbticks})
@@ -357,8 +364,8 @@ def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01, bor
     col_kw.update(ckw)
     CB = fig.colorbar(TT, cax=cax, use_gridspec=True, **col_kw)
 
-    CB.set_label(cblabel)
-    CB.ax.tick_params(which='both', length=0.0)
+    CB.set_label(cblabel, **label_kw)
+    CB.ax.tick_params(which='both', length=0.0, **ticks_kw)
     CB.outline.set_linewidth(blw)
     if borders is True:
         if len(borcol) == 0:
@@ -367,6 +374,7 @@ def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01, bor
         else:
             CB.cmap.set_under(color=borcol[0])
             CB.cmap.set_over(color=borcol[1])
+    
     CB.outline.set_figure(fig)
     return CB
 

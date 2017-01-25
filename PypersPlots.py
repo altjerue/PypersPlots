@@ -313,7 +313,6 @@ def theGradient(ax, v1, v2, t, cmlim, LNorm=False, cmap=None, rasterd=True):
         CM = ax.pcolormesh(v1, v2, t,
                            cmap=cmap,
                            norm=col.LogNorm(vmin=cm_min, vmax=cm_max),
-                           shading='gourard',
                            rasterized=rasterd
         )
     else:

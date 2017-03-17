@@ -19,7 +19,7 @@ def figsize(scale, landscape=True, ratio=None, txtwidth=None):
     fig_size = [fig_width,fig_height]
     return fig_size
 
-def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k'):
+def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k', lw=1.0, tklen=6.0):
     """Define the matplotlib preamble.
 
     The LaTeX preamble here corresponds to the preamble in MNRAS class. It
@@ -71,18 +71,20 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k'):
 
     rc_mnras_preamble = {
         "text.usetex": True,        # use LaTeX to write all text
-        "text.dvipnghack": True,
+        "text.dvipnghack": False,
         "text.latex.preamble": pream,
         "text.latex.unicode": False,
-        "text.latex.preamble": pream,
-        "axes.labelsize": 'x-large',  # fontsize for x and y labels (was 10)
+        "axes.linewidth": lw,
+        "axes.labelsize": 'large',  # fontsize for x and y labels (was 10)
         "axes.unicode_minus": False,
         "axes.edgecolor": edgecol,
-        "legend.labelspacing": 0.2,
+        "legend.frameon": True,
         "legend.fancybox": False,
         "legend.framealpha": 1.0,
-        "legend.edgecolor": edgecol,
+        "legend.facecolor": 'inherit',
+        "legend.edgecolor": 'inherit',
         "legend.borderpad": 0.4,
+        "legend.labelspacing": 0.2,
         "legend.handletextpad": 0.3,
         "legend.handlelength": 1.5,
         "legend.borderaxespad": 0.7,
@@ -90,20 +92,20 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k'):
                                   landscape=landscape,
                                   ratio=ratio,
                                   txtwidth=txtwdth),
-        "lines.linewidth": 1.0,
-        "xtick.major.width": 1.0,
-        "xtick.minor.width": 1.0,
-        "xtick.major.size": 6.0,
-        "xtick.minor.size": 3.0,
+        "lines.linewidth": lw,
+        "xtick.major.width": lw,
+        "xtick.minor.width": lw,
+        "xtick.major.size": tklen,
+        "xtick.minor.size": tklen/2.0,
         "xtick.direction": 'in',
         "xtick.top": True,
         "xtick.minor.visible": True,
         "xtick.labelsize": 'medium',
         "xtick.color": edgecol,
-        "ytick.major.width": 1.0,
-        "ytick.minor.width": 1.0,
-        "ytick.major.size": 6.0,
-        "ytick.minor.size": 3.0,
+        "ytick.major.width": lw,
+        "ytick.minor.width": lw,
+        "ytick.major.size": tklen,
+        "ytick.minor.size": tklen/2.0,
         "ytick.direction": 'in',
         "ytick.right": True,
         "ytick.minor.visible": True,
@@ -152,38 +154,39 @@ def initPlot(nrows=1, ncols=1, redraw=True, shareY=False, shareX=False, polar=Fa
 
     return fig,ax
 
-def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True, yticks=True, xlog=False, ylog=False, labels_kw=None, ticks_kw=None, minticks_off=False, gridon=False, lw=1.0):
-    from matplotlib.ticker import LogLocator
+def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True, yticks=True, xlog=False, ylog=False, labels_kw=None, ticks_kw=None, minticks_off=False, gridon=False):
+    from matplotlib.ticker import LogLocator,LogFormatterMathtext
     if labels_kw is None:
         labels_kw = {}
 
     if ticks_kw is None:
-        ticks_kw = {
-            "width" : lw
-        }
+        ticks_kw = {}
 
     if xticks:
+        if xlog:
+            ax.set_xscale('log')
+            ax.xaxis.set_major_formatter(LogFormatterMathtext()) 
         ax.tick_params(axis='x', which='major', **ticks_kw)
     else:
         ax.set_xticklabels([])
 
     if yticks:
+        if ylog:
+            ax.set_yscale('log')
+            ax.yaxis.set_major_formatter(LogFormatterMathtext())
         ax.tick_params(axis='y', which='major', **ticks_kw)
     else:
         ax.set_yticklabels([])
 
-    if xlog:
-        ax.set_xscale('log')
-        ax.xaxis.set_major_locator(LogLocator(base=10.0))
-        ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs=range(2,10)))
-    if ylog:
-        ax.set_yscale('log')
-        ax.yaxis.set_major_locator(LogLocator(base=10.0))
-        ax.yaxis.set_minor_locator(LogLocator(base=10.0, subs=range(2,10)))
-
     if minticks_off:
         ax.minorticks_off()
-
+    else:
+        try:
+            tilen = ticks_kw['lenght']
+            ax.tick_params(axis='y', which='minor', length=tilen/1.5)
+            ax.tick_params(axis='x', which='minor', length=tilen/1.5)
+        except KeyError:
+            pass
     if xlabel is not None:
         ax.set_xlabel(xlabel, **labels_kw)
     if ylabel is not None:
@@ -196,13 +199,13 @@ def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True, ytick
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
 
-    for axis in ax.spines.keys():
-        ax.spines[axis].set_linewidth(lw)
+    # for axis in ax.spines.keys():
+    #     ax.spines[axis].set_linewidth(lw)
 
     if gridon:
-        ax.grid(which='both')
+        ax.grid(which='both',zorder=-100)
 
-def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=False, printPDF=True, printEPS=False, delPNG=True, PNG2EPS=True):
+def printer(fig, fname, savedir=None, pgfdir=None, onscreen=False, rasterd=True, printPNG=False, printPDF=True, printEPS=False, printPGF=True, delPNG=True, PNG2EPS=True):
     if onscreen:
         fig.suptitle(fname)
         fig.show()
@@ -211,6 +214,8 @@ def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=Fal
         import os
         if savedir is None:
             savedir = os.getcwd() + '/'
+        if pgfdir is None:
+            pgfdir = savedir
         fullname = savedir + fname
         if  printPNG:
             fig.savefig(fullname + '.png', format='png', rasterized=rasterd, frameon=False, transparent=False)
@@ -218,54 +223,57 @@ def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=Fal
             fig.savefig(fullname + '.pdf', format='pdf', rasterized=rasterd, frameon=False)
         if printEPS:
             fig.savefig(fullname + '.eps', format='eps', rasterized=rasterd, frameon=False)
-        fig.savefig(fullname + '.pgf', format='pgf', rasterized=True, frameon=False)
+
+        if printPGF:
+            fig.savefig(fullname + '.pgf', format='pgf', rasterized=True, frameon=False)
         
-        if PNG2EPS:
+            if PNG2EPS:
 
-            counter = 0
+                counter = 0
 
-            for item in os.listdir(savedir):
-                img_name = "-img%d" % (counter)
-                if item.endswith(img_name + ".png") and item.startswith(fname):
-                    im = sp.Popen(['imgtops', '-3', '-e', fullname + img_name + ".png"], stdout=sp.PIPE)
-                    imEPS, imerr = im.communicate()
-                    imEPSf = open(fullname + img_name + ".eps", 'w')
-                    imEPSf.write(imEPS)
-                    imEPSf.close()
-                    if delPNG:
-                        sp.call(['rm', '-f', fullname + img_name + '.png'])
-                    counter += 1
+                for item in os.listdir(savedir):
+                    img_name = "-img%d" % (counter)
+                    if item.endswith(img_name + ".png") and item.startswith(fname):
+    #                     im = sp.Popen(['imgtops', '-3', '-e', fullname + img_name + ".png"], stdout=sp.PIPE)
+    #                     imEPS, imerr = im.communicate()
+    #                     imEPSf = open(fullname + img_name + ".eps", 'w')
+    #                     imEPSf.write(imEPS)
+    #                     imEPSf.close()
+                        im = sp.call(['convert', fullname + img_name + ".png", "-quality", "100", "eps3:" + fullname + img_name + ".eps"])
+                        if delPNG:
+                            sp.call(['rm', '-f', fullname + img_name + '.png'])
+                        counter += 1
 
-            # MODIF PGF FILE (PNG -> EPS & LOC -> FULL LOC)
-            replacements = {'png':'eps', fname: savedir + fname}
-            lines = []
-            with open(fullname + '.pgf') as infile:
-                for line in infile:
-                    for src, target in replacements.iteritems():
-                        line = line.replace(src, target)
-                    lines.append(line)
-            with open(fullname + '.pgf', 'w') as outfile:
-                for line in lines:
-                    outfile.write(line)
+                # MODIF PGF FILE (PNG -> EPS & LOC -> FULL LOC)
+                replacements = {'png':'eps', fname: pgfdir + fname}
+                lines = []
+                with open(fullname + '.pgf') as infile:
+                    for line in infile:
+                        for src, target in replacements.iteritems():
+                            line = line.replace(src, target)
+                        lines.append(line)
+                with open(fullname + '.pgf', 'w') as outfile:
+                    for line in lines:
+                        outfile.write(line)
 
-            # if printEPS:
-            #     import matplotlib as mpl
-            #     from pgf2eps import pgf2eps
-            #     pream = mpl.rcParams["pgf.preamble"]
-            #     pgf2eps(fullname, pream)
+                # if printEPS:
+                #     import matplotlib as mpl
+                #     from pgf2eps import pgf2eps
+                #     pream = mpl.rcParams["pgf.preamble"]
+                #     pgf2eps(fullname, pream)
 
-        else:
+            else:
 
-            replacements = {fname: savedir + fname}
-            lines = []
-            with open(fullname + '.pgf') as infile:
-                for line in infile:
-                    for src, target in replacements.iteritems():
-                        line = line.replace(src, target)
-                    lines.append(line)
-            with open(fullname + '.pgf', 'w') as outfile:
-                for line in lines:
-                    outfile.write(line)
+                replacements = {fname: pgfdir + fname}
+                lines = []
+                with open(fullname + '.pgf') as infile:
+                    for line in infile:
+                        for src, target in replacements.iteritems():
+                            line = line.replace(src, target)
+                        lines.append(line)
+                with open(fullname + '.pgf', 'w') as outfile:
+                    for line in lines:
+                        outfile.write(line)
 
     print('  Printing: done')
 

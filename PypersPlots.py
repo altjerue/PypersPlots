@@ -202,13 +202,14 @@ def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True, ytick
     if gridon:
         ax.grid(which='both')
 
-def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=False, printPDF=True, printEPS=False, delPNG=True, PNG2EPS=True):
+def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=False, printPDF=True, printEPS=False, delPNG=True, printPGF=False, PNG2EPS=False):
     if onscreen:
         fig.suptitle(fname)
         fig.show()
     else:
         import subprocess as sp
         import os
+        fig.tight_layout()
         if savedir is None:
             savedir = os.getcwd() + '/'
         fullname = savedir + fname
@@ -218,54 +219,55 @@ def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=Fal
             fig.savefig(fullname + '.pdf', format='pdf', rasterized=rasterd, frameon=False)
         if printEPS:
             fig.savefig(fullname + '.eps', format='eps', rasterized=rasterd, frameon=False)
-        fig.savefig(fullname + '.pgf', format='pgf', rasterized=True, frameon=False)
+        if printPGF:
+            fig.savefig(fullname + '.pgf', format='pgf', rasterized=True, frameon=False)
         
-        if PNG2EPS:
+            if PNG2EPS:
 
-            counter = 0
+                counter = 0
 
-            for item in os.listdir(savedir):
-                img_name = "-img%d" % (counter)
-                if item.endswith(img_name + ".png") and item.startswith(fname):
-                    im = sp.Popen(['imgtops', '-3', '-e', fullname + img_name + ".png"], stdout=sp.PIPE)
-                    imEPS, imerr = im.communicate()
-                    imEPSf = open(fullname + img_name + ".eps", 'w')
-                    imEPSf.write(imEPS)
-                    imEPSf.close()
-                    if delPNG:
-                        sp.call(['rm', '-f', fullname + img_name + '.png'])
-                    counter += 1
+                for item in os.listdir(savedir):
+                    img_name = "-img%d" % (counter)
+                    if item.endswith(img_name + ".png") and item.startswith(fname):
+                        im = sp.Popen(['imgtops', '-3', '-e', fullname + img_name + ".png"], stdout=sp.PIPE)
+                        imEPS, imerr = im.communicate()
+                        imEPSf = open(fullname + img_name + ".eps", 'w')
+                        imEPSf.write(imEPS)
+                        imEPSf.close()
+                        if delPNG:
+                            sp.call(['rm', '-f', fullname + img_name + '.png'])
+                        counter += 1
 
-            # MODIF PGF FILE (PNG -> EPS & LOC -> FULL LOC)
-            replacements = {'png':'eps', fname: savedir + fname}
-            lines = []
-            with open(fullname + '.pgf') as infile:
-                for line in infile:
-                    for src, target in replacements.iteritems():
-                        line = line.replace(src, target)
-                    lines.append(line)
-            with open(fullname + '.pgf', 'w') as outfile:
-                for line in lines:
-                    outfile.write(line)
+                # MODIF PGF FILE (PNG -> EPS & LOC -> FULL LOC)
+                replacements = {'png':'eps', fname: savedir + fname}
+                lines = []
+                with open(fullname + '.pgf') as infile:
+                    for line in infile:
+                        for src, target in replacements.iteritems():
+                            line = line.replace(src, target)
+                        lines.append(line)
+                with open(fullname + '.pgf', 'w') as outfile:
+                    for line in lines:
+                        outfile.write(line)
 
-            # if printEPS:
-            #     import matplotlib as mpl
-            #     from pgf2eps import pgf2eps
-            #     pream = mpl.rcParams["pgf.preamble"]
-            #     pgf2eps(fullname, pream)
+                # if printEPS:
+                #     import matplotlib as mpl
+                #     from pgf2eps import pgf2eps
+                #     pream = mpl.rcParams["pgf.preamble"]
+                #     pgf2eps(fullname, pream)
 
-        else:
+            else:
 
-            replacements = {fname: savedir + fname}
-            lines = []
-            with open(fullname + '.pgf') as infile:
-                for line in infile:
-                    for src, target in replacements.iteritems():
-                        line = line.replace(src, target)
-                    lines.append(line)
-            with open(fullname + '.pgf', 'w') as outfile:
-                for line in lines:
-                    outfile.write(line)
+                replacements = {fname: savedir + fname}
+                lines = []
+                with open(fullname + '.pgf') as infile:
+                    for line in infile:
+                        for src, target in replacements.iteritems():
+                            line = line.replace(src, target)
+                        lines.append(line)
+                with open(fullname + '.pgf', 'w') as outfile:
+                    for line in lines:
+                        outfile.write(line)
 
     print('  Printing: done')
 

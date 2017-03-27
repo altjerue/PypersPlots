@@ -59,23 +59,26 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k', 
     mpl.backend_bases.register_backend('pgf', FigureCanvasPgf)
 
     pream = [
-        r"\let\mit=\mathnormal",
-        r"\DeclareRobustCommand\cal{\@fontswitch{\relax}{\mathcal}}",
-        r"\SetSymbolFont{symbols}{bold}{OMS}{cmsy}{b}{n}",
-        r"\DeclareSymbolFont{UPM}{U}{eur}{m}{n}",
-        r"\SetSymbolFont{UPM}{bold}{U}{eur}{b}{n}",
-        r"\DeclareSymbolFont{AMSa}{U}{msa}{m}{n}",
+        # r"\let\mit=\mathnormal",
+        # r"\DeclareRobustCommand\cal{\@fontswitch{\relax}{\mathcal}}",
+        # r"\SetSymbolFont{symbols}{bold}{OMS}{cmsy}{b}{n}",
+        # r"\DeclareSymbolFont{UPM}{U}{eur}{m}{n}",
+        # r"\SetSymbolFont{UPM}{bold}{U}{eur}{b}{n}",
+        # r"\DeclareSymbolFont{AMSa}{U}{msa}{m}{n}",
+        r"\usepackage{amssymb}",
         r"\usepackage{amsmath}",
         r"\usepackage{txfonts}",
+        r"\usepackage{txgreeks}",
     ]
 
     rc_mnras_preamble = {
         "text.usetex": True,        # use LaTeX to write all text
-        "text.dvipnghack": False,
         "text.latex.preamble": pream,
         "text.latex.unicode": False,
+        "text.color": edgecol,
         "axes.linewidth": lw,
-        "axes.labelsize": 'large',  # fontsize for x and y labels (was 10)
+        "axes.labelcolor": edgecol,
+        "axes.labelsize": 'x-large',  # fontsize for x and y labels (was 10)
         "axes.unicode_minus": False,
         "axes.edgecolor": edgecol,
         "legend.frameon": True,
@@ -100,7 +103,7 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k', 
         "xtick.direction": 'in',
         "xtick.top": True,
         "xtick.minor.visible": True,
-        "xtick.labelsize": 'medium',
+        "xtick.labelsize": 'large',
         "xtick.color": edgecol,
         "ytick.major.width": lw,
         "ytick.minor.width": lw,
@@ -109,7 +112,7 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k', 
         "ytick.direction": 'in',
         "ytick.right": True,
         "ytick.minor.visible": True,
-        "ytick.labelsize": 'medium',
+        "ytick.labelsize": 'large',
         "ytick.color": edgecol,
         "savefig.transparent": True,
         "savefig.dpi": 300,
@@ -143,9 +146,9 @@ def initPlot(nrows=1, ncols=1, redraw=True, shareY=False, shareX=False, polar=Fa
 
     gskw = {}
     if shareY:
-        gskw.update({'hspace' : 0.0})
-    if shareX:
         gskw.update({'wspace' : 0.0})
+    if shareX:
+        gskw.update({'hspace' : 0.0})
 
     if polar:
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, subplot_kw={'projection' : 'polar'}, sharey=shareY, sharex=shareX, gridspec_kw=gskw)

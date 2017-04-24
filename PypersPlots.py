@@ -14,8 +14,8 @@ def figsize(scale, landscape=True, ratio=None, txtwidth=None):
         fig_width = fig_width_pt*inches_per_pt*scale   # width in inches
         fig_height = fig_width/ratio                   # height in inches
     else:
-        fig_height = fig_width_pt*inches_per_pt*scale  # height in inches
-        fig_width = fig_height/ratio                   # width in inches
+        fig_width = fig_width_pt*inches_per_pt*scale  # width in inches
+        fig_height = fig_width*ratio                 # height in inches
     fig_size = [fig_width,fig_height]
     return fig_size
 
@@ -130,7 +130,7 @@ def inserTeXpreamble(preamble):
         mpl.rcParams["pgf.preamble"].append(p)
     mpl.rcParams.update()
 
-def initPlot(nrows=1, ncols=1, redraw=True, shareY=False, shareX=False, polar=False):
+def initPlot(nrows=1, ncols=1, redraw=True, shareY=False, shareX=False, gskw=None):
     """Initializing plot.
 
     Return:
@@ -144,16 +144,13 @@ def initPlot(nrows=1, ncols=1, redraw=True, shareY=False, shareX=False, polar=Fa
     if redraw:
         plt.close('all')
 
-    gskw = {}
+    if gskw is None:
+        gskw = {}
     if shareY:
         gskw.update({'wspace' : 0.0})
     if shareX:
         gskw.update({'hspace' : 0.0})
-
-    if polar:
-        fig, ax = plt.subplots(nrows=nrows, ncols=ncols, subplot_kw={'projection' : 'polar'}, sharey=shareY, sharex=shareX, gridspec_kw=gskw)
-    else:
-        fig, ax = plt.subplots(nrows=nrows, ncols=ncols, sharey=shareY, sharex=shareX, gridspec_kw=gskw)
+    fig, ax = plt.subplots(nrows=nrows, ncols=ncols, sharey=shareY, sharex=shareX, gridspec_kw=gskw)
 
     return fig,ax
 
@@ -208,13 +205,17 @@ def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True, ytick
     if gridon:
         ax.grid(which='both',zorder=-100)
 
-def printer(fig, fname, savedir=None, pgfdir=None, onscreen=False, rasterd=True, printPNG=False, printPDF=True, printEPS=False, printPGF=True, delPNG=True, PNG2EPS=True):
+def printer(fig, fname, savedir=None, pgfdir=None, onscreen=False, rasterd=True, printPNG=False, printPDF=True, printEPS=False, printPGF=True, delPNG=True, PNG2EPS=True, tight=True):
     if onscreen:
+        if tight:
+            fig.tight_layout()
         fig.suptitle(fname)
         fig.show()
     else:
         import subprocess as sp
         import os
+        if tight:
+            fig.tight_layout()
         if savedir is None:
             savedir = os.getcwd() + '/'
         if pgfdir is None:

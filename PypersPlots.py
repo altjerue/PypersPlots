@@ -164,21 +164,21 @@ def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True, ytick
     if ticks_kw is None:
         ticks_kw = {}
 
-    if xticks:
-        if xlog:
-            ax.set_xscale('log')
-            ax.xaxis.set_major_formatter(LogFormatterMathtext()) 
-        ax.tick_params(axis='x', which='major', **ticks_kw)
-    else:
-        ax.set_xticklabels([])
+    # if xticks:
+    #     if xlog:
+    #         ax.set_xscale('log')
+    #         ax.xaxis.set_major_formatter(LogFormatterMathtext()) 
+    #     ax.tick_params(axis='x', which='major', **ticks_kw)
+    # else:
+    #     ax.set_xticklabels([])
 
-    if yticks:
-        if ylog:
-            ax.set_yscale('log')
-            ax.yaxis.set_major_formatter(LogFormatterMathtext())
-        ax.tick_params(axis='y', which='major', **ticks_kw)
-    else:
-        ax.set_yticklabels([])
+    # if yticks:
+    #     if ylog:
+    #         ax.set_yscale('log')
+    #         ax.yaxis.set_major_formatter(LogFormatterMathtext())
+    #     ax.tick_params(axis='y', which='major', **ticks_kw)
+    # else:
+    #     ax.set_yticklabels([])
 
     if minticks_off:
         ax.minorticks_off()
@@ -208,14 +208,13 @@ def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True, ytick
         ax.grid(which='both',zorder=-100)
 
 def printer(fig, fname, savedir=None, pgfdir=None, onscreen=False, rasterd=True, printPNG=False, printPDF=True, printEPS=False, printPGF=True, delPNG=True, PNG2EPS=True):
-def printer(fig, fname, savedir=None, onscreen=False, rasterd=True, printPNG=False, printPDF=True, printEPS=False, delPNG=True, printPGF=False, PNG2EPS=False):
     if onscreen:
         fig.suptitle(fname)
         fig.show()
     else:
         import subprocess as sp
         import os
-        fig.tight_layout()
+        #fig.tight_layout()
         if savedir is None:
             savedir = os.getcwd() + '/'
         if pgfdir is None:

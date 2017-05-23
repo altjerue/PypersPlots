@@ -81,7 +81,6 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k', 
         "axes.labelsize": 'x-large',  # fontsize for x and y labels (was 10)
         "axes.unicode_minus": False,
         "axes.edgecolor": edgecol,
-        "legend.frameon": True,
         "legend.fancybox": False,
         "legend.framealpha": 1.0,
         "legend.facecolor": 'inherit',
@@ -177,6 +176,8 @@ def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True, ytick
     #     ax.tick_params(axis='y', which='major', **ticks_kw)
     # else:
     #     ax.set_yticklabels([])
+    
+    ax.tick_params(axis='both', which='major', **ticks_kw)
 
     if minticks_off:
         ax.minorticks_off()
@@ -348,8 +349,7 @@ def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01, bor
         
     cax_kw = { 'shrink' : size,
                'aspect' : 20.0/width,
-               'pad' : pad,
-               'anchor': 'C'
+               'pad' : pad
     }
 
     col_kw = {}
@@ -365,12 +365,11 @@ def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01, bor
         cbticks = ticker.LogLocator(base=10.0, subs=subs)
         col_kw.update({'ticks': cbticks})
 
-
     try:
         list(lax)
-        cax,ckw = colbar.make_axes([ax for ax in lax.flat], **cax_kw)
+        cax,ckw = colbar.make_axes_gridspec([ax for ax in lax.flat], **cax_kw)
     except TypeError:
-        cax, ckw = colbar.make_axes(lax, **cax_kw)
+        cax, ckw = colbar.make_axes_gridspec(lax, **cax_kw)
 
     col_kw.update(ckw)
     CB = fig.colorbar(TT, cax=cax, use_gridspec=True, **col_kw)

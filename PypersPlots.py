@@ -155,11 +155,16 @@ def initPlot(nrows=1, ncols=1, redraw=True, shareY=False, shareX=False, gskw=Non
 
 def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True, yticks=True, xlog=False, ylog=False, labels_kw=None, ticks_kw=None, minticks_off=False, gridon=False):
     from matplotlib.ticker import LogLocator,LogFormatterMathtext
-    if labels_kw is None:
-        labels_kw = {}
+    if labels_kw is not None:
+        if xlabel is not None:
+            ax.set_xlabel(xlabel, **labels_kw)
+        if ylabel is not None:
+            ax.set_ylabel(ylabel, **labels_kw)
+        #labels_kw = {}
 
-    if ticks_kw is None:
-        ticks_kw = {}
+    if ticks_kw is not None:
+        ax.tick_params(axis='both', which='major', **ticks_kw)
+        #ticks_kw = {}
 
     # if xticks:
     #     if xlog:
@@ -177,8 +182,6 @@ def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True, ytick
     # else:
     #     ax.set_yticklabels([])
     
-    ax.tick_params(axis='both', which='major', **ticks_kw)
-
     if minticks_off:
         ax.minorticks_off()
     else:
@@ -188,10 +191,6 @@ def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True, ytick
             ax.tick_params(axis='x', which='minor', length=tilen/1.5)
         except KeyError:
             pass
-    if xlabel is not None:
-        ax.set_xlabel(xlabel, **labels_kw)
-    if ylabel is not None:
-        ax.set_ylabel(ylabel, **labels_kw)
 
     if xlim is None:
         xlim = ax.get_xlim()
@@ -389,7 +388,6 @@ def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01, bor
     return CB
 
 def addInset(fig, anchor, wscale=0.05, hscale=0.05):
-
     w, h = fig.get_size_inches()
     rect = anchor[0], anchor[1], w*wscale, h*hscale
     inax = fig.add_axes(rect)

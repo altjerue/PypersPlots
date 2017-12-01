@@ -1,6 +1,10 @@
+# -*- coding: utf-8 -*-
+"""This is the docstring for extractor."""
 from __future__ import division
 
+
 def interpol(v1, v2, tt, NxM, logscale=False, rescale=False):
+    """Interpolate data with not a regular grid."""
     import numpy as np
     import scipy.interpolate
     N = NxM[0]
@@ -12,16 +16,15 @@ def interpol(v1, v2, tt, NxM, logscale=False, rescale=False):
         v1i = np.linspace(v1.min(), v1.max(), N)
         v2i = np.linspace(v2.min(), v2.max(), M)
     ti = scipy.interpolate.griddata((v1, v2), tt,
-                                    (v1i[None,:], v2i[:,None]),
-                                    method='cubic',
-                                    rescale=rescale
-    )
-    return v1i,v2i,ti
+                                    (v1i[None, :], v2i[:, None]),
+                                    method='cubic', rescale=rescale)
+    return v1i, v2i, ti
 
-def dataExtract3col(filename, NxM, cols=(0,1,2),rescale=False):
-    """dataExtract3col(filename, NxM, cols=(0,1,2))
 
-    Four columns extraction routine. Getting data ready for contour
+def dataExtract3col(filename, NxM, cols=(0, 1, 2), rescale=False):
+    """Extract 3 columns from a data file.
+
+    Three columns extraction routine. Getting data ready for contour
     plotting.
 
     filename: string
@@ -30,16 +33,15 @@ def dataExtract3col(filename, NxM, cols=(0,1,2),rescale=False):
     N: int
     Size of the temporal arrays to generate the grid.
 
-    cols: tuple
+    cols: Tuple
     Tuple of three int referring to the columns to be read.
     """
     import numpy as np
-    import scipy.interpolate
-    v1, v2, tt = np.loadtxt(filename, usecols=cols, unpack=True)
-    return interpol(v1,v2,tt,NxM)
+    return np.loadtxt(filename, usecols=cols, unpack=True)
 
-def dataExtract2col(filename, cols=(0,1)):
-    """dataExtract3col(filename, N, cols=(0,1,2))
+
+def dataExtract2col(filename, cols=(0, 1)):
+    """Extract 3 columns from a data file.
 
     Four columns extraction routine. Getting data ready for contour
     plotting.
@@ -53,8 +55,10 @@ def dataExtract2col(filename, cols=(0,1)):
     import numpy as np
     return np.loadtxt(filename, usecols=cols, unpack=True)
 
+
 def hdf5ExtractScalar(h5file, dsets, group=None):
     """Extract data from an HDF5 data file.
+
 
     h5file: string
     File name.
@@ -85,6 +89,7 @@ def hdf5ExtractScalar(h5file, dsets, group=None):
             v = h5f[group][dsets][0]
     h5f.close()
     return v
+
 
 def hdf5Extract1D(h5file, dsets, group=None):
     """Extract data from an HDF5 data file.
@@ -119,6 +124,7 @@ def hdf5Extract1D(h5file, dsets, group=None):
     h5f.close()
     return v
 
+
 def hdf5Extract2D(h5file, dsets, group=None):
     """Extract data from an HDF5 data file.
 
@@ -135,22 +141,23 @@ def hdf5Extract2D(h5file, dsets, group=None):
         if type(dsets) is list:
             v = []
             for i in range(0, len(dsets)):
-                v.append(h5f[dsets[i]][:,:])
+                v.append(h5f[dsets[i]][:, :])
             v = np.array(v)
             v = v.squeeze()
         else:
-            v = h5f[dsets][:,:]
+            v = h5f[dsets][:, :]
     else:
         if type(dsets) is list:
             v = []
             for i in range(0, len(dsets)):
-                v.append(h5f[group][dsets[i]][:,:])
+                v.append(h5f[group][dsets[i]][:, :])
             v = np.array(v)
             v = v.squeeze()
         else:
-            v = h5f[group][dsets][:,:]
+            v = h5f[group][dsets][:, :]
     h5f.close()
     return v
+
 
 def hdf5Extract3D(h5file, dsets, group=None):
     """Extract data from an HDF5 data file.
@@ -168,18 +175,19 @@ def hdf5Extract3D(h5file, dsets, group=None):
         if type(dsets) is list:
             v = []
             for i in range(0, len(dsets)):
-                v.append(h5f[dsets[i]][:,:,:])
+                v.append(h5f[dsets[i]][:, :, :])
         else:
-            v = h5f[dsets][:,:,:]
+            v = h5f[dsets][:, :, :]
     else:
         if type(dsets) is list:
             v = []
             for i in range(0, len(dsets)):
-                v.append(h5f[group][dsets[i]][:,:,:])
+                v.append(h5f[group][dsets[i]][:, :, :])
         else:
-            v = h5f[group][dsets][:,:,:]
+            v = h5f[group][dsets][:, :, :]
     h5f.close()
     return v
+
 
 def hdf5Extract4D(h5file, dsets, group=None):
     """Extract data from an HDF5 data file.
@@ -197,15 +205,15 @@ def hdf5Extract4D(h5file, dsets, group=None):
         if type(dsets) is list:
             v = []
             for i in range(0, len(dsets)):
-                v.append(h5f[dsets[i]][:,:,:,:])
+                v.append(h5f[dsets[i]][:, :, :, :])
         else:
-            v = h5f[dsets][:,:,:,:]
+            v = h5f[dsets][:, :, :, :]
     else:
         if type(dsets) is list:
             v = []
             for i in range(0, len(dsets)):
-                v.append(h5f[group][dsets[i]][:,:,:,:])
+                v.append(h5f[group][dsets[i]][:, :, :, :])
         else:
-            v = h5f[group][dsets][:,:,:,:]
+            v = h5f[group][dsets][:, :, :, :]
     h5f.close()
     return v

@@ -22,9 +22,9 @@ order to have imgtops properly installed I did the following:
     * Install python package `pillow`
     * Modify the `setup.py`. Change PIL for pillow
 
-# Examples #
+# Examples
 
-## Linear plot ##
+## Linear plot
 
 ```python
 import numpy as np
@@ -39,7 +39,8 @@ pp.printer(fig,'sin')
 ```
 ![](README_figs/sin.png)
 
-## Contours plot ##
+
+## Contours plot
 
 ``` python
 import numpy as np
@@ -54,7 +55,8 @@ pp.printer(fig,'contours')
 ```
 ![](README_figs/contours.png)
 
-## Gradient plot ##
+
+## Gradient plot
 
 ``` python
 import numpy as np
@@ -75,23 +77,24 @@ pp.printer(fig,'gradient')
 ```
 ![](README_figs/gradient.png)
 
-## More elaborate example examples ##
 
-### Streams and fields ###
+## More elaborate example examples
+
+### Streams and fields
 ![](README_figs/fields_and_streams.png)
 
-### Temperature profiles from internal shocks simulations ###
+### Temperature profiles from internal shocks simulations
 ![](README_figs/sL_sR_T.png)
 
-### Magnetobremsstrahlung ###
+### Magnetobremsstrahlung
 ![](README_figs/mbs.png)
 
 To see how these examples were produced go to the wiki. I will be placing
 more elaborated stuff there.
 
-# Recomendations and observations #
+# Recomendations and observations
 
-## Interacting with Python ##
+## Interacting with Python
 For a good interactive plotting I suggest using IPython (v2.7). Once in the
 command line call the magic command `%matplotlib osx`, if you are using
 macOS:
@@ -103,7 +106,7 @@ To see the backends available for matplotlib just type:
 %matplotlib -l
 ```
 
-## For your benefit ##
+## For your benefit
 
 This module is under development. Please if you have any issue, comment or
 upgrades they are most welcome.

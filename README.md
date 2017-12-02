@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 This is a library intended to produce ready to publish (and not so heavy) plots.
 
 # Prerequisites #

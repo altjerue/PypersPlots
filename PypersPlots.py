@@ -10,27 +10,34 @@ def figsize(scale, landscape=True, ratio=None, txtwidth=None):
         fig_width_pt = 469.755
     else:
         fig_width_pt = txtwidth
-    inches_per_pt = 1.0/72.27     # Convert pt to inch
+    inches_per_pt = 1.0 / 72.27     # Convert pt to inch
     if ratio is None:
         # Aesthetic ratio (you could change this)
-        golden_mean = 2.0/(np.sqrt(5.0)-1.0)
+        golden_mean = 2.0 / (np.sqrt(5.0) - 1.0)
         ratio = golden_mean
     if landscape:
         # width in inches
-        fig_width = fig_width_pt*inches_per_pt*scale
+        fig_width = fig_width_pt * inches_per_pt * scale
         # height in inches
-        fig_height = fig_width/ratio
+        fig_height = fig_width / ratio
     else:
         # width in inches
-        fig_width = fig_width_pt*inches_per_pt*scale
+        fig_width = fig_width_pt * inches_per_pt * scale
         # height in inches
-        fig_height = fig_width*ratio
+        fig_height = fig_width * ratio
     fig_size = [fig_width, fig_height]
     return fig_size
 
 
+#  ##          ###    ######## ######## ##     ## #### ######## ##    ##
+#  ##         ## ##      ##    ##        ##   ##   ##  ##        ##  ##
+#  ##        ##   ##     ##    ##         ## ##    ##  ##         ####
+#  ##       ##     ##    ##    ######      ###     ##  ######      ##
+#  ##       #########    ##    ##         ## ##    ##  ##          ##
+#  ##       ##     ##    ##    ##        ##   ##   ##  ##          ##
+#  ######## ##     ##    ##    ######## ##     ## #### ##          ##
 def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k',
-             lw=1.0, tklen=6.0):
+             lw=1.0, tklen=6.0, interact=False):
     """Define the matplotlib preamble.
 
     The default LaTeX preamble here corresponds to the preamble in MNRAS class.
@@ -68,8 +75,7 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k',
         "axes.labelsize": 'x-large',  # fontsize for x and y labels (was 10)
         "axes.unicode_minus": False,
         "axes.edgecolor": edgecol,
-        "legend.fancybox": False,
-        "legend.framealpha": 1.0,
+        "legend.framealpha": 0.2,
         "legend.facecolor": 'inherit',
         "legend.edgecolor": 'inherit',
         "legend.borderpad": 0.4,
@@ -82,20 +88,12 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k',
                                   ratio=ratio,
                                   txtwidth=txtwdth),
         "lines.linewidth": lw,
-        "xtick.major.width": lw,
-        "xtick.minor.width": lw,
-        "xtick.major.size": tklen,
-        "xtick.minor.size": tklen/2.0,
-        "xtick.direction": 'in',
+        "xtick.direction": 'out',
         "xtick.top": True,
         "xtick.minor.visible": True,
         "xtick.labelsize": 'large',
         "xtick.color": edgecol,
-        "ytick.major.width": lw,
-        "ytick.minor.width": lw,
-        "ytick.major.size": tklen,
-        "ytick.minor.size": tklen/2.0,
-        "ytick.direction": 'in',
+        "ytick.direction": 'out',
         "ytick.right": True,
         "ytick.minor.visible": True,
         "ytick.labelsize": 'large',
@@ -104,9 +102,13 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k',
         "savefig.dpi": 300,
         "savefig.bbox": 'tight',
         "savefig.pad_inches": 0.05,
-        "pgf.texsystem": "pdflatex",
+        "savefig.frameon": False,
+        "backend": "MacOSX"
     }
     mpl.rcParams.update(rc_mnras_preamble)
+
+    if interact:
+        mpl.use('Qt5Agg')
 
 
 def inserTeXpreamble(preamble):
@@ -144,16 +146,27 @@ def initPlot(nrows=1, ncols=1, redraw=True, shareY=False, shareX=False,
     return fig, ax
 
 
+#  ########  ########  ######   #######  ########
+#  ##     ## ##       ##    ## ##     ## ##     ##
+#  ##     ## ##       ##       ##     ## ##     ##
+#  ##     ## ######   ##       ##     ## ########
+#  ##     ## ##       ##       ##     ## ##   ##
+#  ##     ## ##       ##    ## ##     ## ##    ##
+#  ########  ########  ######   #######  ##     ##
 def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True,
           yticks=True, xlog=False, ylog=False, labels_kw=None, ticks_kw=None,
           minticks_off=False, gridon=False):
     """Decorate the plot you have produced."""
-    # from matplotlib.ticker import LogLocator, LogFormatterMathtext
     if labels_kw is not None:
         if xlabel is not None:
             ax.set_xlabel(xlabel, **labels_kw)
         if ylabel is not None:
             ax.set_ylabel(ylabel, **labels_kw)
+    else:
+        if xlabel is not None:
+            ax.set_xlabel(xlabel)
+        if ylabel is not None:
+            ax.set_ylabel(ylabel)
         # labels_kw = {}
 
     if ticks_kw is None:
@@ -161,31 +174,8 @@ def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True,
     else:
         ax.tick_params(axis='both', which='major', **ticks_kw)
 
-    # if xticks:
-    #     if xlog:
-    #         ax.set_xscale('log')
-    #         ax.xaxis.set_major_formatter(LogFormatterMathtext())
-    #     ax.tick_params(axis='x', which='major', **ticks_kw)
-    # else:
-    #     ax.set_xticklabels([])
-
-    # if yticks:
-    #     if ylog:
-    #         ax.set_yscale('log')
-    #         ax.yaxis.set_major_formatter(LogFormatterMathtext())
-    #     ax.tick_params(axis='y', which='major', **ticks_kw)
-    # else:
-    #     ax.set_yticklabels([])
-
     if minticks_off:
         ax.minorticks_off()
-    else:
-        try:
-            tilen = ticks_kw['lenght']
-            ax.tick_params(axis='y', which='minor', length=tilen/1.5)
-            ax.tick_params(axis='x', which='minor', length=tilen/1.5)
-        except KeyError:
-            pass
 
     if xlim is None:
         xlim = ax.get_xlim()
@@ -201,9 +191,16 @@ def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True,
         ax.grid(which='both', zorder=-100)
 
 
+#  ########  ########  #### ##    ## ######## ######## ########
+#  ##     ## ##     ##  ##  ###   ##    ##    ##       ##     ##
+#  ##     ## ##     ##  ##  ####  ##    ##    ##       ##     ##
+#  ########  ########   ##  ## ## ##    ##    ######   ########
+#  ##        ##   ##    ##  ##  ####    ##    ##       ##   ##
+#  ##        ##    ##   ##  ##   ###    ##    ##       ##    ##
+#  ##        ##     ## #### ##    ##    ##    ######## ##     ##
 def printer(fig, fname, savedir=None, pgfdir=None, onscreen=False,
             rasterd=True, printPNG=False, printPDF=True, printEPS=False,
-            printPGF=True, delPNG=True, PNG2EPS=True, tight=True):
+            printPGF=False, delPNG=True, PNG2EPS=True, tight=True):
     """Print on screen or to a file the plot generated."""
     if onscreen:
         if tight:
@@ -211,7 +208,6 @@ def printer(fig, fname, savedir=None, pgfdir=None, onscreen=False,
         fig.suptitle(fname)
         fig.show()
     else:
-        import subprocess as sp
         import os
         if tight:
             fig.tight_layout()
@@ -222,68 +218,14 @@ def printer(fig, fname, savedir=None, pgfdir=None, onscreen=False,
         fullname = savedir + fname
         if printPNG:
             fig.savefig(fullname + '.png', format='png', rasterized=rasterd,
-                        frameon=False, transparent=False)
+                        transparent=False)
         if printPDF:
-            fig.savefig(fullname + '.pdf', format='pdf', rasterized=rasterd,
-                        frameon=False)
+            fig.savefig(fullname + '.pdf', format='pdf', rasterized=rasterd)
         if printEPS:
-            fig.savefig(fullname + '.eps', format='eps', rasterized=rasterd,
-                        frameon=False)
+            fig.savefig(fullname + '.eps', format='eps', rasterized=rasterd)
 
         if printPGF:
-            fig.savefig(fullname + '.pgf', format='pgf', rasterized=True,
-                        frameon=False)
-
-            if PNG2EPS:
-
-                counter = 0
-
-                for item in os.listdir(savedir):
-                    img_name = "-img%d" % (counter)
-                    if item.endswith(img_name + ".png") and item.startswith(fname):
-                        # im = sp.Popen(['imgtops', '-3', '-e', fullname +
-                        # img_name + ".png"], stdout=sp.PIPE)
-                        # imEPS, imerr = im.communicate()
-                        # imEPSf = open(fullname + img_name + ".eps", 'w')
-                        # imEPSf.write(imEPS)
-                        # imEPSf.close()
-                        im = sp.call(['convert', fullname + img_name + ".png",
-                                      "-quality", "100", "eps3:" + fullname +
-                                      img_name + ".eps"])
-                        if delPNG:
-                            sp.call(['rm', '-f', fullname + img_name + '.png'])
-                        counter += 1
-
-                # MODIF PGF FILE (PNG -> EPS & LOC -> FULL LOC)
-                replacements = {'png': 'eps', fname: pgfdir + fname}
-                lines = []
-                with open(fullname + '.pgf') as infile:
-                    for line in infile:
-                        for src, target in replacements.iteritems():
-                            line = line.replace(src, target)
-                        lines.append(line)
-                with open(fullname + '.pgf', 'w') as outfile:
-                    for line in lines:
-                        outfile.write(line)
-
-                # if printEPS:
-                #     import matplotlib as mpl
-                #     from pgf2eps import pgf2eps
-                #     pream = mpl.rcParams["pgf.preamble"]
-                #     pgf2eps(fullname, pream)
-
-            else:
-
-                replacements = {fname: pgfdir + fname}
-                lines = []
-                with open(fullname + '.pgf') as infile:
-                    for line in infile:
-                        for src, target in replacements.iteritems():
-                            line = line.replace(src, target)
-                        lines.append(line)
-                with open(fullname + '.pgf', 'w') as outfile:
-                    for line in lines:
-                        outfile.write(line)
+            fig.savefig(fullname + '.pgf', format='pgf', rasterized=True)
 
     print('  Printing: done')
 
@@ -362,7 +304,7 @@ def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01,
         ticks_kw = {}
 
     cax_kw = {'shrink': size,
-              'aspect': 20.0/width,
+              'aspect': 20.0 / width,
               'pad': pad}
 
     col_kw = {}
@@ -404,6 +346,6 @@ def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01,
 def addInset(fig, anchor, wscale=0.05, hscale=0.05):
     """Produce an inset."""
     w, h = fig.get_size_inches()
-    rect = anchor[0], anchor[1], w*wscale, h*hscale
+    rect = anchor[0], anchor[1], w * wscale, h * hscale
     inax = fig.add_axes(rect)
     return inax

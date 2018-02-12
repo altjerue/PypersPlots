@@ -72,10 +72,10 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k',
         "text.color": edgecol,
         "axes.linewidth": 1.25 * lw,
         "axes.labelcolor": edgecol,
-        "axes.labelsize": 'x-large',  # fontsize for x and y labels (was 10)
+        # "axes.labelsize": 'medium',  # fontsize for x and y labels (was 10)
         "axes.unicode_minus": False,
         "axes.edgecolor": edgecol,
-        "legend.framealpha": 0.2,
+        # "legend.framealpha": 0.2,
         "legend.facecolor": 'inherit',
         "legend.edgecolor": 'inherit',
         "legend.borderpad": 0.4,
@@ -91,12 +91,10 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k',
         "xtick.direction": 'in',
         "xtick.top": True,
         "xtick.minor.visible": True,
-        "xtick.labelsize": 'large',
         "xtick.color": edgecol,
         "ytick.direction": 'in',
         "ytick.right": True,
         "ytick.minor.visible": True,
-        "ytick.labelsize": 'large',
         "ytick.color": edgecol,
         "savefig.transparent": True,
         "savefig.dpi": 300,
@@ -108,6 +106,8 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k',
 
     if interact:
         mpl.use('Qt5Agg')
+        import matplotlib.pyplot as plt
+        plt.ion()
 
 
 def inserTeXpreamble(preamble):
@@ -199,7 +199,7 @@ def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, labels_kw=None,
 #  ##        ##    ##   ##  ##   ###    ##    ##       ##    ##
 #  ##        ##     ## #### ##    ##    ##    ######## ##     ##
 def printer(fig, fname, savedir=None, pgfdir=None, onscreen=False,
-            rasterd=True, printPNG=False, printPDF=True, printEPS=False,
+            rasterd=False, printPNG=False, printPDF=True, printEPS=False,
             printPGF=False, delPNG=True, PNG2EPS=True, tight=True):
     """Print on screen or to a file the plot generated."""
     if onscreen:
@@ -217,7 +217,7 @@ def printer(fig, fname, savedir=None, pgfdir=None, onscreen=False,
             pgfdir = savedir
         fullname = savedir + fname
         if printPNG:
-            fig.savefig(fullname + '.png', format='png', rasterized=rasterd,
+            fig.savefig(fullname + '.png', format='png', rasterized=True,
                         transparent=False)
         if printPDF:
             fig.savefig(fullname + '.pdf', format='pdf', rasterized=rasterd)
@@ -233,7 +233,7 @@ def printer(fig, fname, savedir=None, pgfdir=None, onscreen=False,
 # The contour plots
 def theContours(ax, v1, v2, t, clim=None, numl=None, clabels=False,
                 logsep=False, fmt='%1.0f', levs=None, labelpos=None,
-                rasterd=True, colors='k'):
+                rasterd=False, colors='k'):
     """Set contour lines."""
     import numpy as np
     if numl is None:
@@ -263,7 +263,7 @@ def theContours(ax, v1, v2, t, clim=None, numl=None, clabels=False,
     return CS
 
 
-def theGradient(ax, v1, v2, t, cmlim, LNorm=False, cmap=None, rasterd=True):
+def theGradient(ax, v1, v2, t, cmlim, LNorm=False, cmap=None, rasterd=False):
     """Set the contour gradient plot."""
     import matplotlib.colors as col
 

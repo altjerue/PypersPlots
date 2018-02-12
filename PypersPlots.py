@@ -70,7 +70,7 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k',
         "text.latex.preamble": pream,
         "text.latex.unicode": False,
         "text.color": edgecol,
-        "axes.linewidth": lw,
+        "axes.linewidth": 1.25 * lw,
         "axes.labelcolor": edgecol,
         "axes.labelsize": 'x-large',  # fontsize for x and y labels (was 10)
         "axes.unicode_minus": False,
@@ -88,12 +88,12 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k',
                                   ratio=ratio,
                                   txtwidth=txtwdth),
         "lines.linewidth": lw,
-        "xtick.direction": 'out',
+        "xtick.direction": 'in',
         "xtick.top": True,
         "xtick.minor.visible": True,
         "xtick.labelsize": 'large',
         "xtick.color": edgecol,
-        "ytick.direction": 'out',
+        "ytick.direction": 'in',
         "ytick.right": True,
         "ytick.minor.visible": True,
         "ytick.labelsize": 'large',
@@ -102,8 +102,7 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k',
         "savefig.dpi": 300,
         "savefig.bbox": 'tight',
         "savefig.pad_inches": 0.05,
-        "savefig.frameon": False,
-        "backend": "MacOSX"
+        "savefig.frameon": False
     }
     mpl.rcParams.update(rc_mnras_preamble)
 
@@ -153,10 +152,16 @@ def initPlot(nrows=1, ncols=1, redraw=True, shareY=False, shareX=False,
 #  ##     ## ##       ##       ##     ## ##   ##
 #  ##     ## ##       ##    ## ##     ## ##    ##
 #  ########  ########  ######   #######  ##     ##
-def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True,
-          yticks=True, xlog=False, ylog=False, labels_kw=None, ticks_kw=None,
-          minticks_off=False, gridon=False):
+def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, labels_kw=None,
+          ticks_kw=None,  minticks_off=False, gridon=False):
     """Decorate the plot you have produced."""
+    if xlim is None:
+        xlim = ax.get_xlim()
+    if ylim is None:
+        ylim = ax.get_ylim()
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+
     if labels_kw is not None:
         if xlabel is not None:
             ax.set_xlabel(xlabel, **labels_kw)
@@ -176,13 +181,8 @@ def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, xticks=True,
 
     if minticks_off:
         ax.minorticks_off()
-
-    if xlim is None:
-        xlim = ax.get_xlim()
-    if ylim is None:
-        ylim = ax.get_ylim()
-    ax.set_xlim(xlim)
-    ax.set_ylim(ylim)
+    else:
+        ax.minorticks_on()
 
     # for axis in ax.spines.keys():
     #     ax.spines[axis].set_linewidth(lw)
@@ -208,7 +208,7 @@ def printer(fig, fname, savedir=None, pgfdir=None, onscreen=False,
         fig.suptitle(fname)
         fig.show()
     else:
-        import os
+        # import os
         if tight:
             fig.tight_layout()
         if savedir is None:
@@ -227,7 +227,7 @@ def printer(fig, fname, savedir=None, pgfdir=None, onscreen=False,
         if printPGF:
             fig.savefig(fullname + '.pgf', format='pgf', rasterized=True)
 
-    print('  Printing: done')
+    print('  Printing ' + fname + ': DONE')
 
 
 # The contour plots
@@ -292,7 +292,7 @@ def theGradient(ax, v1, v2, t, cmlim, LNorm=False, cmap=None, rasterd=True):
 
 def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01,
                 borders=True, borcol=[], width=1.0, size=1.0, loc='right',
-                label_kw=None, ticks_kw=None):
+                fmt=None, label_kw=None, ticks_kw=None):
     """Produce a color bar for gradient plots."""
     import matplotlib.colors as col
     import matplotlib.colorbar as colbar
@@ -326,7 +326,7 @@ def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01,
         cax, ckw = colbar.make_axes_gridspec(lax, **cax_kw)
 
     col_kw.update(ckw)
-    CB = fig.colorbar(TT, cax=cax, use_gridspec=True, **col_kw)
+    CB = fig.colorbar(TT, cax=cax, use_gridspec=True, format=fmt, ** col_kw)
 
     CB.set_label(cblabel, **label_kw)
     CB.ax.tick_params(which='both', length=0.0, **ticks_kw)

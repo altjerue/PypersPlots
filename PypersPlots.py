@@ -83,6 +83,7 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k',
         "legend.handletextpad": 0.3,
         "legend.handlelength": 1.5,
         "legend.borderaxespad": 0.7,
+        "legend.fancybox": False,
         "figure.figsize": figsize(fscale,
                                   landscape=landscape,
                                   ratio=ratio,
@@ -326,7 +327,7 @@ def setColorBar(TT, fig, lax, blw=1.0, cblabel=r"$z$", subs=[1.0], pad=0.01,
         cax, ckw = colbar.make_axes_gridspec(lax, **cax_kw)
 
     col_kw.update(ckw)
-    CB = fig.colorbar(TT, cax=cax, use_gridspec=True, format=fmt, ** col_kw)
+    CB = fig.colorbar(TT, cax=cax, use_gridspec=True, format=fmt, **col_kw)
 
     CB.set_label(cblabel, **label_kw)
     CB.ax.tick_params(which='both', length=0.0, **ticks_kw)

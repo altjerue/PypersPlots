@@ -29,13 +29,14 @@ def figsize(scale, landscape=True, ratio=None, txtwidth=None):
     return fig_size
 
 
-#  ##          ###    ######## ######## ##     ## #### ######## ##    ##
-#  ##         ## ##      ##    ##        ##   ##   ##  ##        ##  ##
-#  ##        ##   ##     ##    ##         ## ##    ##  ##         ####
-#  ##       ##     ##    ##    ######      ###     ##  ######      ##
-#  ##       #########    ##    ##         ## ##    ##  ##          ##
-#  ##       ##     ##    ##    ##        ##   ##   ##  ##          ##
-#  ######## ##     ##    ##    ######## ##     ## #### ##          ##
+#
+#  #              #######        #     #
+#  #         ##      #    ######  #   #  # ###### #   #
+#  #        #  #     #    #        # #   # #       # #
+#  #       #    #    #    #####     #    # #####    #
+#  #       ######    #    #        # #   # #        #
+#  #       #    #    #    #       #   #  # #        #
+#  ####### #    #    #    ###### #     # # #        #
 def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k',
              lw=1.0, tklen=6.0, interact=False):
     """Define the matplotlib preamble.
@@ -146,13 +147,13 @@ def initPlot(nrows=1, ncols=1, redraw=True, shareY=False, shareX=False,
     return fig, ax
 
 
-#  ########  ########  ######   #######  ########
-#  ##     ## ##       ##    ## ##     ## ##     ##
-#  ##     ## ##       ##       ##     ## ##     ##
-#  ##     ## ######   ##       ##     ## ########
-#  ##     ## ##       ##       ##     ## ##   ##
-#  ##     ## ##       ##    ## ##     ## ##    ##
-#  ########  ########  ######   #######  ##     ##
+#
+#  #####  ######  ####   ####  #####
+#  #    # #      #    # #    # #    #
+#  #    # #####  #      #    # #    #
+#  #    # #      #      #    # #####
+#  #    # #      #    # #    # #   #
+#  #####  ######  ####   ####  #    #
 def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, labels_kw=None,
           ticks_kw=None,  minticks_off=False, gridon=False):
     """Decorate the plot you have produced."""
@@ -192,13 +193,13 @@ def decor(ax, xlim=None, ylim=None, xlabel=None, ylabel=None, labels_kw=None,
         ax.grid(which='both', zorder=-100)
 
 
-#  ########  ########  #### ##    ## ######## ######## ########
-#  ##     ## ##     ##  ##  ###   ##    ##    ##       ##     ##
-#  ##     ## ##     ##  ##  ####  ##    ##    ##       ##     ##
-#  ########  ########   ##  ## ## ##    ##    ######   ########
-#  ##        ##   ##    ##  ##  ####    ##    ##       ##   ##
-#  ##        ##    ##   ##  ##   ###    ##    ##       ##    ##
-#  ##        ##     ## #### ##    ##    ##    ######## ##     ##
+#
+#  #####  #####  # #    # ##### ###### #####
+#  #    # #    # # ##   #   #   #      #    #
+#  #    # #    # # # #  #   #   #####  #    #
+#  #####  #####  # #  # #   #   #      #####
+#  #      #   #  # #   ##   #   #      #   #
+#  #      #    # # #    #   #   ###### #    #
 def printer(fig, fname, savedir=None, pgfdir=None, onscreen=False,
             rasterd=False, printPNG=False, printPDF=True, printEPS=False,
             printPGF=False, delPNG=True, PNG2EPS=True, tight=True):
@@ -209,7 +210,7 @@ def printer(fig, fname, savedir=None, pgfdir=None, onscreen=False,
         fig.suptitle(fname)
         fig.show()
     else:
-        # import os
+        import os
         if tight:
             fig.tight_layout()
         if savedir is None:

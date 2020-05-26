@@ -100,8 +100,7 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k',
         "savefig.transparent": True,
         "savefig.dpi": 300,
         "savefig.bbox": 'tight',
-        "savefig.pad_inches": 0.05,
-        "savefig.frameon": False
+        "savefig.pad_inches": 0.05
     }
     mpl.rcParams.update(rc_mnras_preamble)
 

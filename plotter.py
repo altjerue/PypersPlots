@@ -69,7 +69,6 @@ def latexify(fscale=1.0, ratio=None, landscape=True, txtwdth=None, edgecol='k',
     rc_mnras_preamble = {
         "text.usetex": True,        # use LaTeX to write all text
         "text.latex.preamble": pream,
-        "text.latex.unicode": False,
         "text.color": edgecol,
         "axes.linewidth": 1.25 * lw,
         "axes.labelcolor": edgecol,
